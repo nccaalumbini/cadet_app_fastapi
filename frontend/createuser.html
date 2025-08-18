@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create User - NCCAA Lumbini</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        /* smooth focus transition */
+        input:focus,
+        select:focus {
+            transition: all 0.3s ease-in-out;
+        }
+
+        button {
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 font-sans flex items-center justify-center min-h-screen relative overflow-hidden">
+
+    <!-- Main background blob -->
+    <div
+        class="absolute top-0 left-0 w-72 h-72 bg-brand-green rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob">
+    </div>
+
+    <div class="bg-white shadow-2xl rounded-3xl w-full max-w-2xl p-10 z-10 relative">
+        <h2 class="text-3xl font-bold text-center text-brand-green mb-10">Create New User</h2>
+
+        <form id="create-user-form" class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <!-- Cadet Number -->
+            <div class="flex flex-col">
+                <label for="cadet_number" class="mb-2 text-gray-700 font-medium">Cadet Number</label>
+                <input type="text" id="cadet_number"
+                    class="p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-brand-green focus:outline-none shadow-sm">
+            </div>
+
+            <!-- Username -->
+            <div class="flex flex-col">
+                <label for="username" class="mb-2 text-gray-700 font-medium">Username</label>
+                <input type="text" id="username"
+                    class="p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-brand-green focus:outline-none shadow-sm">
+            </div>
+
+            <!-- Email -->
+            <div class="flex flex-col">
+                <label for="email" class="mb-2 text-gray-700 font-medium">Email</label>
+                <input type="email" id="email"
+                    class="p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-brand-green focus:outline-none shadow-sm">
+            </div>
+
+            <!-- Contact Number -->
+            <div class="flex flex-col">
+                <label for="contact_number" class="mb-2 text-gray-700 font-medium">Contact Number</label>
+                <input type="text" id="contact_number"
+                    class="p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-brand-green focus:outline-none shadow-sm">
+            </div>
+
+            <!-- Address -->
+            <div class="flex flex-col sm:col-span-2">
+                <label for="address" class="mb-2 text-gray-700 font-medium">Address</label>
+                <input type="text" id="address"
+                    class="p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-brand-green focus:outline-none shadow-sm">
+            </div>
+
+            <!-- District -->
+            <div class="flex flex-col">
+                <label for="district" class="mb-2 text-gray-700 font-medium">District</label>
+                <select id="district"
+                    class="p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-brand-green focus:outline-none shadow-sm">
+                    <option value="">Select District</option>
+                    <option value="Palpa">Palpa</option>
+                    <option value="Arghakhanchi">Arghakhanchi</option>
+                    <option value="Dang">Dang</option>
+                    <option value="Kapilvastu">Kapilvastu</option>
+                    <option value="Nawalparasi">Nawalparasi</option>
+                    <option value="Rupandehi">Rupandehi</option>
+                    <option value="Pyuthan">Pyuthan</option>
+                    <option value="Rolpa">Rolpa</option>
+                    <option value="Gulmi">Gulmi</option>
+                </select>
+            </div>
+
+            <!-- Role -->
+            <div class="flex flex-col">
+                <label for="role" class="mb-2 text-gray-700 font-medium">Role</label>
+                <select id="role"
+                    class="p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-brand-green focus:outline-none shadow-sm">
+                    <option value="">Select Role</option>
+                    <option value="district_admin">District Admin</option>
+                    <option value="user">Cadet User</option>
+                </select>
+            </div>
+
+            <!-- Password -->
+            <div class="flex flex-col relative sm:col-span-2">
+                <label for="password" class="mb-2 text-gray-700 font-medium">Password</label>
+                <input type="password" id="password"
+                    class="p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-brand-green focus:outline-none shadow-sm w-full">
+                <span id="password-toggle" class="absolute top-12 right-3 cursor-pointer text-gray-500">
+                    <i class="fa fa-eye"></i>
+                </span>
+            </div>
+
+            <div id="msg" class="text-red-500 text-sm sm:col-span-2"></div>
+
+            <!-- Submit -->
+            <div class="sm:col-span-2 flex justify-center">
+                <button type="submit"
+                    class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-full shadow-lg shadow-green-200">
+                    Create User
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Password toggle
+        const passwordToggle = document.getElementById('password-toggle');
+        const passwordInput = document.getElementById('password');
+
+        passwordToggle.addEventListener('click', () => {
+            passwordInput.type = passwordInput.type === 'password' ? 'text' : 'password';
+            passwordToggle.innerHTML = passwordInput.type === 'password' ? '<i class="fa fa-eye"></i>' : '<i class="fa fa-eye-slash"></i>';
+        });
+
+        // API Base URL
+        const API_BASE = "http://localhost:8000";
+
+        // Form submission
+        const form = document.getElementById('create-user-form');
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = localStorage.getItem("token");
+            if (!token) {
+                document.getElementById('msg').textContent = "You must be logged in as admin.";
+                return;
+            }
+
+            const payload = {
+                cadet_number: document.getElementById('cadet_number').value.trim(),
+                username: document.getElementById('username').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                contact_number: document.getElementById('contact_number').value.trim(),
+                address: document.getElementById('address').value.trim(),
+                district: document.getElementById('district').value,
+                role: document.getElementById('role').value,
+                password: document.getElementById('password').value
+            };
+
+            try {
+                const res = await fetch(API_BASE + "/users/create", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer " + token
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || "Failed to create user");
+
+                alert("User created successfully!");
+                form.reset();
+            } catch (err) {
+                document.getElementById('msg').textContent = err.message;
+            }
+        });
+    </script>
+</body>
+
+</html>

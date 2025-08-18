@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NCCAA Lumbini Login</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+  <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+    <img src="assets/image/hero.png" alt="NCCAA Lumbini Logo" class="mx-auto w-24 h-24 mb-4 rounded-full">
+    <h2 class="text-2xl font-bold text-center text-green-600 mb-6">NCCAA Lumbini CDMS</h2>
+
+    <!-- LOGIN FORM -->
+    <form id="login-form" class="space-y-4">
+      <div class="flex flex-col">
+        <label for="username" class="mb-2 text-gray-700">Username or Email:</label>
+        <input type="text" id="li_username" name="username"
+          class="border border-gray-300 p-2 rounded focus:outline-none focus:border-green-500">
+        <div id="li_username_error" class="text-red-500 text-sm mt-1"></div>
+      </div>
+
+      <div class="flex flex-col relative">
+        <label for="password" class="mb-2 text-gray-700">Password:</label>
+        <input type="password" id="li_password" name="password"
+          class="border border-gray-300 p-2 rounded focus:outline-none focus:border-green-500">
+        <span id="password-toggle" class="absolute top-9 right-3 cursor-pointer text-gray-500">
+          <i class="fa fa-eye"></i>
+        </span>
+        <div id="li_password_error" class="text-red-500 text-sm mt-1"></div>
+      </div>
+
+      <div id="li_msg" class="text-red-500 text-sm"></div>
+
+      <div class="flex justify-center">
+        <button type="submit"
+          class="bg-green-600 text-white py-2 px-6 rounded hover:bg-green-700 transition">Login</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    // Password toggle
+    const passwordToggle = document.getElementById('password-toggle');
+    const passwordInput = document.getElementById('li_password');
+
+    passwordToggle.addEventListener('click', () => {
+      passwordInput.type = passwordInput.type === 'password' ? 'text' : 'password';
+      passwordToggle.innerHTML = passwordInput.type === 'password' ? '<i class="fa fa-eye"></i>' : '<i class="fa fa-eye-slash"></i>';
+    });
+
+    // API Login
+    const API_BASE = "http://localhost:8000";
+    const loginForm = document.getElementById('login-form');
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const identifier = document.getElementById('li_username').value.trim(); // username or email
+      const password = document.getElementById('li_password').value;
+
+      try {
+        const res = await fetch(API_BASE + "/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            username: identifier.includes('@') ? null : identifier,
+            email: identifier.includes('@') ? identifier : null,
+            password
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Login failed");
+
+        // Save token
+        localStorage.setItem("access_token", data.access_token);
+
+        // Redirect to dashboard
+        window.location.href = "frontend/dashboard/dashboard.html";
+      } catch (err) {
+        document.getElementById('li_msg').textContent = err.message;
+      }
+    });
+  </script>
+
+</body>
+
+</html>

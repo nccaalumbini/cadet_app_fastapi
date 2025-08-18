@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+SQLAlchemy>=1.4
+PyMySQL
+passlib[bcrypt]
+python-jose[cryptography]
+pydantic
+python-dotenv
