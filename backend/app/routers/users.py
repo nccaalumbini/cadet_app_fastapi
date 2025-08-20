@@ -1,30 +1,18 @@
-from fastapi import APIRouter, Depends, HTTPException, Header, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from ..db import get_db
 from .. import models, schemas
-from ..security import hash_password, decode_token
+from ..security import hash_password
+from ..deps import get_current_user  # use from deps.py
 
 router = APIRouter()
 
-def get_current_user(authorization: str = Header(None), db: Session = Depends(get_db)) -> models.User:
-    """
-    Get current user from Bearer token.
-    Raises 401 if token missing or invalid.
-    """
-    if not authorization or not authorization.lower().startswith("bearer "):
-        raise HTTPException(status_code=401, detail="Missing or invalid Authorization header")
-    token = authorization.split(" ", 1)[1]
-    payload = decode_token(token)
-    if not payload:
-        raise HTTPException(status_code=401, detail="Invalid or expired token")
-
-    user = db.get(models.User, int(payload["sub"]))
-    if not user:
-        raise HTTPException(status_code=401, detail="User not found")
-    return user
-
 @router.post("/create", response_model=schemas.UserOut)
-def create_user(payload: schemas.UserCreate, current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+def create_user(
+    payload: schemas.UserCreate,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     """
     Province admin can create users for any district.
     District admin can create users only for their district.
@@ -32,7 +20,6 @@ def create_user(payload: schemas.UserCreate, current_user: models.User = Depends
     if current_user.role not in ["province_admin", "district_admin"]:
         raise HTTPException(status_code=403, detail="Unauthorized to create users")
 
-    # District admin can only create users in their district
     if current_user.role == "district_admin":
         if payload.district and payload.district.lower() != current_user.district.lower():
             raise HTTPException(status_code=403, detail="Cannot create user outside your district")
@@ -62,9 +49,11 @@ def create_user(payload: schemas.UserCreate, current_user: models.User = Depends
     db.refresh(user)
     return user
 
-@router.get("/me", response_model=schemas.UserOut)
-def me(user: models.User = Depends(get_current_user)):
-    """
-    Returns current user's profile.
-    """
-    return user
+@router.get("/me")
+def read_users_me(current_user: models.User = Depends(get_current_user)):
+    return {
+        "id": current_user.id,
+        "username": current_user.username,
+        "role": current_user.role,
+        "district": current_user.district,
+    }

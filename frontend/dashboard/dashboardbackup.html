@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NCCAA Lumbini Cadet System</title>
-    <script src="https://accounts.google.com/gsi/client"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -155,42 +154,21 @@
 </head>
 
 <body class="bg-gradient-to-br from-olive-50 to-olive-200 min-h-screen font-sans">
-    <!-- Login Screen -->
-    <div id="loginScreen" class="flex items-center justify-center min-h-screen">
-        <div
-            class="bg-white/95 p-10 rounded-2xl shadow-xl w-full max-w-md flex flex-col items-center border border-olive-300">
-            <div class="bg-olive-100 p-4 rounded-full mb-6 shadow-inner">
-                <img src="assets/images/1.png" alt="NCC Logo" class="rounded-full border-4 border-olive-600">
-            </div>
-            <h1 class="text-3xl font-bold text-olive-800 mb-2 tracking-tight text-center">NCCAA Lumbini Cadet System
-            </h1>
-            <p class="text-olive-600 mb-8 text-center font-medium">सुरक्षित क्याडेट दर्ता प्रणाली</p>
-            <div class="w-full mb-6">
-                <div id="g_id_onload"
-                    data-client_id="548742514555-37emngrrulr97jc4spf3a4if8njootvc.apps.googleusercontent.com"
-                    data-callback="handleLogin">
-                </div>
-                <div class="g_id_signin w-full" data-type="standard" data-size="large" data-theme="filled_blue"
-                    data-text="sign_in_with" data-shape="rectangular" data-logo_alignment="center">
-                </div>
-            </div>
-            <p class="text-sm text-olive-500 text-center">Restricted access for NCCAA administrators only</p>
-        </div>
-    </div>
-
-    <!-- App Container (hidden until login) -->
-    <div id="appContainer" class="hidden">
+    <!-- App Container (visible by default) -->
+    <div id="appContainer">
         <!-- Mobile Menu Button -->
         <button id="mobileMenuBtn"
             class="md:hidden fixed top-4 left-4 z-50 bg-olive-700 text-white p-3 rounded-full shadow-lg">
             <i class="fas fa-bars"></i>
         </button>
 
+
         <!-- Sidebar -->
         <aside id="sidebar"
             class="fixed top-0 left-0 h-full w-64 bg-olive-700 text-olive-50 flex flex-col z-50 shadow-xl transition-all duration-300">
             <div class="flex flex-col items-center py-6 border-b border-olive-600">
-                <img src="assets/images/1.png" alt="NCC Logo" class="w-16 h-16 rounded-full border-2 border-white mb-2">
+                <img src="https://via.placeholder.com/64" alt="NCC Logo"
+                    class="w-16 h-16 rounded-full border-2 border-white mb-2">
                 <span class="text-lg font-bold text-olive-50 mb-2">NCCAA</span>
                 <button id="sidebarToggle" class="text-olive-200 hover:text-white mt-2">
                     <i class="fas fa-chevron-left"></i>
@@ -271,7 +249,7 @@
                 </div>
                 <div class="flex items-center gap-4">
                     <div class="flex items-center gap-3 bg-olive-50 rounded-full py-2 px-4">
-                        <img src="assets/images/1.png" alt="User Avatar"
+                        <img src="https://via.placeholder.com/32" alt="User Avatar"
                             class="w-8 h-8 rounded-full border-2 border-olive-300">
                         <span class="font-medium text-olive-800" id="userName">Admin User</span>
                     </div>
@@ -432,7 +410,7 @@
                 </div>
             </div>
             <!-- Add Messages Screen -->
-            <div id="messagesScreen" class="container mx-auto p-2 md:p-6 hidden mt-14 md:mt-0">
+            <div id="messages" class="container mx-auto p-2 md:p-6 hidden mt-14 md:mt-0">
                 <div class="bg-white rounded-2xl shadow-elevated p-4 md:p-6 max-w-6xl mx-auto border border-olive-200">
                     <div
                         class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 md:mb-6 gap-2">
@@ -488,7 +466,7 @@
             </div>
 
             <!-- Add Meet Screen -->
-            <div id="meetScreen" class="container mx-auto p-2 md:p-6 hidden mt-14 md:mt-0">
+            <div id="meet" class="container mx-auto p-2 md:p-6 hidden mt-14 md:mt-0">
                 <div class="bg-white rounded-2xl shadow-elevated p-4 md:p-8 max-w-4xl mx-auto border border-olive-200">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-2">
                         <div>
@@ -936,9 +914,7 @@
                             </button>
                             <button
                                 class="px-2 md:px-4 py-1 md:py-2 bg-olive-700 text-white rounded-lg font-semibold">1</button>
-                            <button
-                                class="px-2 md:px-4 py-1 md:py-2 border border-olive-300 rounded-lg text-olive-700 hover:bg-olive-50">2</button>
-                            <button
+                            <button <button
                                 class="px-2 md:px-4 py-1 md:py-2 border border-olive-300 rounded-lg text-olive-700 hover:bg-olive-50">3</button>
                             <button
                                 class="px-2 md:px-4 py-1 md:py-2 border border-olive-300 rounded-lg text-olive-700 hover:bg-olive-50">
@@ -1164,8 +1140,8 @@
 
         <div id="sidebarOverlay" onclick="closeSidebar()"></div>
 
-        <script src="assets/js/main.js"></script>
-        <script src="assets/js/chat.js"></script>
+        <script src="../assets/js/main.js"></script>
+
 </body>
 
 </html>

@@ -4,6 +4,13 @@ from .routers import auth, users
 
 app = FastAPI(title="Cadet App API")
 
+# Allow requests from your frontend
+origins = [
+    "http://localhost:3000",
+    "http://0.0.0.0:3000",
+]
+
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # adjust in production

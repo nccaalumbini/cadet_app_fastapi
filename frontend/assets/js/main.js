@@ -1,17 +1,25 @@
 // Configuration
-const APP_URL = 'https://script.google.com/macros/s/AKfycbzC5smhOidKxEOmhUfGgUGS5TmaRaMKXOoIuxOE8Z4pW7LTvjG7YaOqwZOe95zK7SMr/exec';
-const ALLOWED_EMAILS = [
-    'nccaalumbini@gmail.com',
-    'dipaadhikary102@gmail.com',
-    'kcpooja60@gmail.com',
-    'deepaadhikary102@gmail.com',
-    'manishanepali155@gmail.com',
-    'mamatagc15@gmail.com'
-];
+// const APP_URL = 'https://script.google.com/macros/s/AKfycbzC5smhOidKxEOmhUfGgUGS5TmaRaMKXOoIuxOE8Z4pW7LTvjG7YaOqwZOe95zK7SMr/exec';
+
 let currentUser = null;
 let isSidebarCollapsed = false;
 let currentScreen = 'dashboard';
 
+
+// Get username from localStorage and display it
+// Get username from localStorage and display it
+document.addEventListener('DOMContentLoaded', () => {
+    const username = localStorage.getItem('username');
+    const token = localStorage.getItem('access_token');
+
+    console.log("DEBUG: username from localStorage:", username);
+
+    if (username && token) {
+        document.getElementById('userName').textContent = username;
+    } else {
+        window.location.href = "../../login.html"; // redirect if not logged in
+    }
+});
 // Language switching
 function switchLanguage(lang) {
     document.querySelectorAll('[lang]').forEach(el => {
@@ -122,22 +130,22 @@ function searchCadets() {
 }
 document.getElementById('searchInput').addEventListener('input', searchCadets);
 
-// Google Sign-In
-function handleLogin(response) {
-    showLoader();
-    const payload = JSON.parse(atob(response.credential.split('.')[1]));
-    if (ALLOWED_EMAILS.includes(payload.email)) {
-        currentUser = payload;
-        sessionStorage.setItem('nccaa_user', JSON.stringify(payload));
-        document.getElementById('userName').textContent = payload.name;
-        showApp();
-        loadDashboardStats();
-    } else {
-        alert('Access restricted to NCCAA administrators only');
-        google.accounts.id.disableAutoSelect();
-    }
-    hideLoader();
-}
+// // Google Sign-In
+// function handleLogin(response) {
+//     showLoader();
+//     const payload = JSON.parse(atob(response.credential.split('.')[1]));
+//     if (ALLOWED_EMAILS.includes(payload.email)) {
+//         currentUser = payload;
+//         sessionStorage.setItem('nccaa_user', JSON.stringify(payload));
+//         document.getElementById('userName').textContent = payload.name;
+//         showApp();
+//         loadDashboardStats();
+//     } else {
+//         alert('Access restricted to NCCAA administrators only');
+//         google.accounts.id.disableAutoSelect();
+//     }
+//     hideLoader();
+// }
 
 // Form submission
 document.getElementById('cadetForm').addEventListener('submit', async (e) => {

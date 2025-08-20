@@ -29,9 +29,19 @@ def login(payload: schemas.LoginIn, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
     # Include role and district in JWT
+    # Corrected token creation
     token = create_access_token(
-        subject=str(user.id),
-        role=user.role,
-        district=user.district
+        data={
+            "sub": str(user.id),
+            "role": user.role,
+            "district": user.district
+        }
     )
-    return {"access_token": token, "token_type": "bearer"}
+    print("DEBUG: Access token created for user:", user.username)
+    return {
+        "access_token": token, 
+        "token_type": "bearer",
+        "role": user.role,
+        "district": user.district,
+        "username": user.username
+    }
