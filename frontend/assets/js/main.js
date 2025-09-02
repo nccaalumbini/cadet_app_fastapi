@@ -1,5 +1,5 @@
 // Configuration
-// const APP_URL = 'https://script.google.com/macros/s/AKfycbzC5smhOidKxEOmhUfGgUGS5TmaRaMKXOoIuxOE8Z4pW7LTvjG7YaOqwZOe95zK7SMr/exec';
+const APP_URL = 'https://script.google.com/macros/s/AKfycbzC5smhOidKxEOmhUfGgUGS5TmaRaMKXOoIuxOE8Z4pW7LTvjG7YaOqwZOe95zK7SMr/exec';
 
 let currentUser = null;
 let isSidebarCollapsed = false;
@@ -16,9 +16,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (username && token) {
         document.getElementById('userName').textContent = username;
+        showApp();
+        loadDashboardStats();
     } else {
         window.location.href = "../../login.html"; // redirect if not logged in
     }
+
+
 });
 // Language switching
 function switchLanguage(lang) {
@@ -38,6 +42,7 @@ function showScreen(screenId) {
         'dashboard': { en: 'Dashboard', np: 'ड्यासबोर्ड' },
         'addCadet': { en: 'Add Cadet', np: 'क्याडेट थप्नुहोस्' },
         'viewCadets': { en: 'View Cadets', np: 'क्याडेट सूची' },
+        'schoolManagement': { en: 'School Management', np: 'विद्यालय व्यवस्थापन' },
         'reports': { en: 'Reports', np: 'रिपोर्टहरू' },
         'settings': { en: 'Sett ings', np: 'सेटिङहरू' },
         'messages': { en: 'Messages', np: 'सन्देशहरू' },
@@ -69,6 +74,16 @@ function showScreen(screenId) {
     }
     if (screenId === 'meet') {
         initMeeting();
+    }
+    if (screenId === 'reports') {
+        // Initialize reports functionality
+        initReports();
+        // Ensure overview section is visible by default
+        document.querySelectorAll('#reports .report-section').forEach(section => {
+            section.classList.remove('active');
+        });
+        const overviewSection = document.getElementById('overview-section');
+        if (overviewSection) overviewSection.classList.add('active');
     }
 }
 
@@ -130,22 +145,7 @@ function searchCadets() {
 }
 document.getElementById('searchInput').addEventListener('input', searchCadets);
 
-// // Google Sign-In
-// function handleLogin(response) {
-//     showLoader();
-//     const payload = JSON.parse(atob(response.credential.split('.')[1]));
-//     if (ALLOWED_EMAILS.includes(payload.email)) {
-//         currentUser = payload;
-//         sessionStorage.setItem('nccaa_user', JSON.stringify(payload));
-//         document.getElementById('userName').textContent = payload.name;
-//         showApp();
-//         loadDashboardStats();
-//     } else {
-//         alert('Access restricted to NCCAA administrators only');
-//         google.accounts.id.disableAutoSelect();
-//     }
-//     hideLoader();
-// }
+
 
 // Form submission
 document.getElementById('cadetForm').addEventListener('submit', async (e) => {
@@ -340,7 +340,7 @@ function viewCadet(cadetId) {
 
 // Initialize app
 function showApp() {
-    document.getElementById('loginScreen').classList.add('hidden');
+    // document.getElementById('loginScreen').classList.add('hidden');
     document.getElementById('appContainer').classList.remove('hidden');
     switchLanguage('en'); // Default language
     showScreen('dashboard');
@@ -481,3 +481,273 @@ function deleteCadet(cadetId) {
         .catch(() => alert('Delete failed. Please try again.'))
         .finally(hideLoader);
 }
+
+
+
+// Reports functionality
+// Initialize reports functionality
+function initReports() {
+    // Navigation between report sections
+    const navLinks = document.querySelectorAll('[data-route]');
+    navLinks.forEach(link => {
+        link.addEventListener('click', function (e) {
+            e.preventDefault();
+            const route = this.getAttribute('data-route');
+            navigateToReports(route);
+        });
+    });
+
+    // View report buttons
+    const viewButtons = document.querySelectorAll('.view-report');
+    viewButtons.forEach(button => {
+        button.addEventListener('click', function () {
+            const reportId = this.getAttribute('data-id');
+            navigateToReports('view', reportId);
+        });
+    });
+
+    // Initialize dynamic form elements
+    initDynamicForms();
+
+    // Initialize total participants calculation
+    initParticipantCounter();
+}
+
+function navigateToReports(route, id = null) {
+    // Hide all report sections
+    document.querySelectorAll('#reports .report-section').forEach(section => {
+        section.classList.remove('active');
+    });
+
+    // Show the requested section
+    if (route === 'overview') {
+        document.getElementById('overview-section').classList.add('active');
+        updateActiveNavReports('overview');
+    } else if (route === 'create') {
+        document.getElementById('create-section').classList.add('active');
+        updateActiveNavReports('create');
+    } else if (route === 'view') {
+        document.getElementById('view-section').classList.add('active');
+        // In a real app, we would fetch report data based on the ID
+        updateActiveNavReports('view');
+    }
+}
+
+function updateActiveNavReports(activeRoute) {
+    // Update navigation highlighting within reports
+    const navLinks = document.querySelectorAll('[data-route]');
+    navLinks.forEach(link => {
+        if (link.getAttribute('data-route') === activeRoute) {
+            link.classList.remove('border-transparent', 'text-gray-500', 'hover:border-gray-300', 'hover:text-gray-700');
+            link.classList.add('border-primary', 'text-dark', 'hover:bg-gray-50');
+        } else {
+            link.classList.remove('border-primary', 'text-dark', 'hover:bg-gray-50');
+            link.classList.add('border-transparent', 'text-gray-500', 'hover:border-gray-300', 'hover:text-gray-700');
+        }
+    });
+}
+
+function initDynamicForms() {
+    // Add guest functionality
+    const addGuestBtn = document.getElementById('add-guest');
+    const guestsContainer = document.getElementById('guests-container');
+
+    if (addGuestBtn && guestsContainer) {
+        addGuestBtn.addEventListener('click', function () {
+            const guestEntry = document.querySelector('.guest-entry').cloneNode(true);
+            guestEntry.querySelectorAll('input, select').forEach(input => {
+                input.value = '';
+            });
+            guestsContainer.appendChild(guestEntry);
+
+            // Add event listener to remove button
+            const removeBtn = guestEntry.querySelector('.remove-guest');
+            removeBtn.addEventListener('click', function () {
+                if (document.querySelectorAll('.guest-entry').length > 1) {
+                    this.closest('.guest-entry').remove();
+                    calculateTotalParticipants();
+                }
+            });
+
+            // Add event listener to service select for rank options
+            const serviceSelect = guestEntry.querySelector('select[name="guest-service[]"]');
+            serviceSelect.addEventListener('change', function () {
+                updateRankOptions(this);
+            });
+        });
+    }
+
+    // Add participant functionality
+    const addParticipantBtn = document.getElementById('add-participant');
+    const participantsContainer = document.getElementById('participants-container');
+
+    if (addParticipantBtn && participantsContainer) {
+        addParticipantBtn.addEventListener('click', function () {
+            const participantEntry = document.querySelector('.participant-entry').cloneNode(true);
+            participantEntry.querySelectorAll('input, select').forEach(input => {
+                input.value = '';
+            });
+            participantsContainer.appendChild(participantEntry);
+
+            // Add event listener to remove button
+            const removeBtn = participantEntry.querySelector('.remove-participant');
+            removeBtn.addEventListener('click', function () {
+                if (document.querySelectorAll('.participant-entry').length > 1) {
+                    this.closest('.participant-entry').remove();
+                    calculateTotalParticipants();
+                }
+            });
+
+            // Add event listener to count input
+            const countInput = participantEntry.querySelector('input[name="participant-count[]"]');
+            countInput.addEventListener('input', calculateTotalParticipants);
+        });
+    }
+
+    // Initialize remove buttons for existing entries
+    document.querySelectorAll('.remove-guest').forEach(btn => {
+        btn.addEventListener('click', function () {
+            if (document.querySelectorAll('.guest-entry').length > 1) {
+                this.closest('.guest-entry').remove();
+                calculateTotalParticipants();
+            }
+        });
+    });
+
+    document.querySelectorAll('.remove-participant').forEach(btn => {
+        btn.addEventListener('click', function () {
+            if (document.querySelectorAll('.participant-entry').length > 1) {
+                this.closest('.participant-entry').remove();
+                calculateTotalParticipants();
+            }
+        });
+    });
+
+    // Initialize service selects for rank options
+    document.querySelectorAll('select[name="guest-service[]"]').forEach(select => {
+        select.addEventListener('change', function () {
+            updateRankOptions(this);
+        });
+    });
+}
+
+function initParticipantCounter() {
+    // Add event listeners to count inputs
+    document.querySelectorAll('input[name="participant-count[]"]').forEach(input => {
+        input.addEventListener('input', calculateTotalParticipants);
+    });
+
+    // Initial calculation
+    calculateTotalParticipants();
+}
+
+function calculateTotalParticipants() {
+    let total = 0;
+
+    // Count guests (each guest entry with a name counts as 1)
+    document.querySelectorAll('input[name="guest-name[]"]').forEach(input => {
+        if (input.value.trim() !== '') {
+            total += 1;
+        }
+    });
+
+    // Count participants from participant counts
+    document.querySelectorAll('input[name="participant-count[]"]').forEach(input => {
+        const count = parseInt(input.value) || 0;
+        total += count;
+    });
+
+    // Update the total display
+    const totalElement = document.getElementById('total-participants');
+    if (totalElement) {
+        totalElement.textContent = total;
+    }
+}
+
+function updateRankOptions(selectElement) {
+    const service = selectElement.value;
+    const rankSelect = selectElement.parentElement.nextElementSibling.querySelector('select');
+
+    // Clear existing options
+    rankSelect.innerHTML = '<option value="">Select Rank</option>';
+
+    // Add options based on service
+    if (service === "police") {
+        const ranks = [
+            "Deputy Inspector General (DIG)",
+            "Senior Superintendent of Police (SSP)",
+            "Superintendent of Police (SP)",
+            "Deputy Superintendent of Police (DSP)",
+            "Inspector",
+            "Assistant Sub-Inspector",
+            "Sub-Inspector",
+            "Constable"
+        ];
+
+        ranks.forEach(rank => {
+            const option = document.createElement('option');
+            option.value = rank.toLowerCase().replace(/\s+/g, '_');
+            option.textContent = rank;
+            rankSelect.appendChild(option);
+        });
+    } else if (service === "nccaa") {
+        const ranks = [
+            "Central Director",
+            "Province Director",
+            "District Director",
+            "Central Co-Director",
+            "Province Co-Director",
+            "District Co-Director",
+            "District Member",
+            "Province Member",
+            "Central Member"
+        ];
+
+        ranks.forEach(rank => {
+            const option = document.createElement('option');
+            option.value = rank.toLowerCase().replace(/\s+/g, '_');
+            option.textContent = rank;
+            rankSelect.appendChild(option);
+        });
+    } else if (service === "army") {
+        const ranks = [
+            "Chief of Army Staff (COAS)",
+            "General",
+            "Lieutenant General",
+            "Major General",
+            "Brigadier General",
+            "Colonel",
+            "Lieutenant Colonel",
+            "Major",
+            "Captain",
+            "Lieutenant",
+            "Second Lieutenant"
+        ];
+
+        ranks.forEach(rank => {
+            const option = document.createElement('option');
+            option.value = rank.toLowerCase().replace(/\s+/g, '_');
+            option.textContent = rank;
+            rankSelect.appendChild(option);
+        });
+    }
+}
+// Close sidebar function
+function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').style.display = 'none';
+    document.body.classList.remove('sidebar-open');
+}
+
+// Set up event listeners
+document.getElementById('sidebarToggle').addEventListener('click', toggleSidebar);
+document.getElementById('mobileMenuBtn').addEventListener('click', () => {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').style.display = 'block';
+    document.body.classList.add('sidebar-open');
+});
+
+// Optional: close sidebar on Esc key
+window.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeSidebar();
+});
