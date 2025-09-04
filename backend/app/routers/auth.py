@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from ..db import get_db, Base, engine
-from .. import models, schemas
-from ..security import verify_password, create_access_token
+from app.core.database import get_db, Base, engine
+from app import models, schemas
+from app.core.security import verify_password, create_access_token
 
 # Ensure tables exist
 Base.metadata.create_all(bind=engine)

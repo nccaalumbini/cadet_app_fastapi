@@ -1,0 +1,1587 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NCCAA - Cadet Management System</title>
+    <!-- Tailwind CSS via CDN (consider proper build process for production) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom styles -->
+    <style>
+        :root {
+            --color-primary: #4a644b;
+            --color-primary-dark: #3a503b;
+            --color-primary-light: #e2e8d8;
+            --color-secondary: #2c5282;
+            --color-accent: #c53030;
+            --color-background: #f8fafc;
+            --color-surface: #ffffff;
+            --color-text-primary: #1a202c;
+            --color-text-secondary: #4a5568;
+            --color-error: #e53e3e;
+            --color-success: #38a169;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --border-radius: 0.5rem;
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--color-background);
+            color: var(--color-text-primary);
+            line-height: 1.6;
+        }
+
+        .btn-primary {
+            background-color: var(--color-primary);
+            color: white;
+            transition: var(--transition);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--color-primary-dark);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-secondary {
+            background-color: var(--color-secondary);
+            color: white;
+            transition: var(--transition);
+        }
+
+        .btn-secondary:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-danger {
+            background-color: var(--color-accent);
+            color: white;
+            transition: var(--transition);
+        }
+
+        .btn-danger:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .card {
+            background-color: var(--color-surface);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid #e2e8f0;
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .form-input {
+            border: 1px solid #cbd5e0;
+            border-radius: var(--border-radius);
+            padding: 0.5rem 0.75rem;
+            transition: var(--transition);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(74, 100, 75, 0.15);
+        }
+
+        .table-row:hover {
+            background-color: #f7fafc;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            color: white;
+            opacity: 0;
+            transform: translateY(1rem);
+            transition: opacity 0.3s, transform 0.3s;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast.success {
+            background-color: var(--color-success);
+        }
+
+        .toast.error {
+            background-color: var(--color-error);
+        }
+
+        [lang="np"] {
+            font-family: 'Mukta', 'Arial', sans-serif;
+        }
+
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--color-primary);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Print styles for reports */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+
+            body,
+            html {
+                background: white !important;
+                color: black !important;
+            }
+
+            .card {
+                box-shadow: none !important;
+                border: 1px solid #ccc !important;
+            }
+        }
+    </style>
+</head>
+
+<body class="h-full">
+    <!-- Toast Notification Container -->
+    <div id="toastContainer"></div>
+
+    <!-- Main Content Container -->
+    <main class="min-h-full">
+        <!-- Add Cadet Form -->
+        <section id="addCadet" class="container mx-auto p-2 md:p-6 hidden mt-14 md:mt-0">
+            <div class="card p-2 md:p-8 max-w-4xl mx-auto">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 md:mb-8 gap-2">
+                    <div>
+                        <h2 class="text-xl md:text-2xl font-bold text-primary" lang="en">Add New Cadet</h2>
+                        <h2 class="text-xl md:text-2xl font-bold text-primary hidden" lang="np">नयाँ क्याडेट थप्नुहोस्
+                        </h2>
+                        <p class="text-secondary text-sm md:text-base" lang="en">Fill in all required fields to register
+                            a new cadet</p>
+                        <p class="text-secondary text-sm md:text-base hidden" lang="np">नयाँ क्याडेट दर्ता गर्न सबै
+                            आवश्यक फिल्डहरू भर्नुहोस्</p>
+                    </div>
+                    <button onclick="showScreen('dashboard')"
+                        class="btn-secondary px-3 md:px-4 py-2 rounded-lg font-semibold flex items-center gap-2 mt-2 md:mt-0"
+                        aria-label="Go back to dashboard">
+                        <i class="fas fa-arrow-left" aria-hidden="true"></i>
+                        <span lang="en">Back</span>
+                        <span lang="np" class="hidden">फिर्ता</span>
+                    </button>
+                </div>
+
+                <form id="cadetForm" class="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6" novalidate>
+                    <!-- Personal Details Card -->
+                    <fieldset class="bg-primary-light rounded-xl p-3 md:p-6 md:col-span-2">
+                        <legend
+                            class="text-base md:text-lg font-bold text-primary mb-2 md:mb-4 flex items-center gap-2">
+                            <i class="fas fa-user-circle" aria-hidden="true"></i>
+                            <span lang="en">Personal Details</span>
+                            <span lang="np" class="hidden">व्यक्तिगत विवरण</span>
+                        </legend>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
+                            <!-- Cadet Number -->
+                            <div class="form-group">
+                                <label for="addCadetNo" class="form-label" lang="en">Cadet Number</label>
+                                <label for="addCadetNo" class="form-label hidden" lang="np">क्याडेट नम्बर</label>
+                                <input type="text" id="addCadetNo" name="cadet_no" class="form-input" required
+                                    pattern="[A-Za-z0-9-]+"
+                                    title="Cadet number should contain only letters, numbers, and hyphens">
+                                <div id="error-cadet_no" class="error-message hidden" role="alert"></div>
+                            </div>
+
+                            <!-- Full Name -->
+                            <div class="form-group">
+                                <label for="addFullName" class="form-label" lang="en">Full Name</label>
+                                <label for="addFullName" class="form-label hidden" lang="np">पुरा नाम</label>
+                                <input type="text" id="addFullName" name="name" class="form-input" required
+                                    minlength="2" maxlength="100">
+                                <div id="error-name" class="error-message hidden" role="alert"></div>
+                            </div>
+
+                            <!-- Name in Nepali -->
+                            <div class="form-group">
+                                <label for="addFullNameNp" class="form-label" lang="en">Name in Nepali</label>
+                                <label for="addFullNameNp" class="form-label hidden" lang="np">नेपालीमा नाम</label>
+                                <input type="text" id="addFullNameNp" name="name_np" class="form-input" required
+                                    minlength="2" maxlength="100">
+                                <div id="error-name_np" class="error-message hidden" role="alert"></div>
+                            </div>
+
+                            <!-- Rank -->
+                            <div class="form-group">
+                                <label for="addRank" class="form-label" lang="en">Rank</label>
+                                <label for="addRank" class="form-label hidden" lang="np">पद</label>
+                                <select id="addRank" name="rank" class="form-input" required>
+                                    <option value="">Select Rank</option>
+                                    <option value="Cadet">Cadet</option>
+                                    <option value="Lance Corporal">Lance Corporal</option>
+                                    <option value="Corporal">Corporal</option>
+                                    <option value="Sergeant">Sergeant</option>
+                                    <option value="Staff Sergeant">Staff Sergeant</option>
+                                    <option value="PJUO">PJUO</option>
+                                    <option value="CJUO">CJUO</option>
+                                    <option value="SUO">SUO</option>
+                                </select>
+                                <div id="error-rank" class="error-message hidden" role="alert"></div>
+                            </div>
+
+                            <!-- Contact -->
+                            <div class="form-group">
+                                <label for="addContact" class="form-label" lang="en">Contact</label>
+                                <label for="addContact" class="form-label hidden" lang="np">सम्पर्क</label>
+                                <input type="tel" id="addContact" name="contact" class="form-input" required
+                                    pattern="[0-9+\-\s()]{7,15}" title="Please enter a valid phone number">
+                                <div id="error-contact" class="error-message hidden" role="alert"></div>
+                            </div>
+
+                            <!-- Address -->
+                            <div class="form-group">
+                                <label for="addAddress" class="form-label" lang="en">Address</label>
+                                <label for="addAddress" class="form-label hidden" lang="np">ठेगाना</label>
+                                <input type="text" id="addAddress" name="address" class="form-input" required
+                                    minlength="5" maxlength="200">
+                                <div id="error-address" class="error-message hidden" role="alert"></div>
+                            </div>
+
+                            <!-- Email -->
+                            <div class="form-group">
+                                <label for="addEmail" class="form-label" lang="en">Email</label>
+                                <label for="addEmail" class="form-label hidden" lang="np">इमेल</label>
+                                <input type="email" id="addEmail" name="email" class="form-input" required>
+                                <div id="error-email" class="error-message hidden" role="alert"></div>
+                            </div>
+
+                            <!-- Gender -->
+                            <div class="form-group">
+                                <label for="addGender" class="form-label" lang="en">Gender</label>
+                                <label for="addGender" class="form-label hidden" lang="np">लिङ्ग</label>
+                                <select id="addGender" name="gender" class="form-input" required>
+                                    <option value="">Select Gender</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                                <div id="error-gender" class="error-message hidden" role="alert"></div>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <!-- Education Details Card -->
+                    <fieldset class="bg-primary-light rounded-xl p-3 md:p-6 md:col-span-2">
+                        <legend
+                            class="text-base md:text-lg font-bold text-primary mb-2 md:mb-4 flex items-center gap-2">
+                            <i class="fas fa-graduation-cap" aria-hidden="true"></i>
+                            <span lang="en">Education Details</span>
+                            <span lang="np" class="hidden">शैक्षिक विवरण</span>
+                        </legend>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
+                            <!-- School Name -->
+                            <div class="form-group">
+                                <label for="addSchool" class="form-label" lang="en">School Name</label>
+                                <label for="addSchool" class="form-label hidden" lang="np">विद्यालयको नाम</label>
+                                <select id="addSchool" name="school" class="form-input" required>
+                                    <option value="">Select School</option>
+                                    <!-- Options will be populated dynamically -->
+                                </select>
+                                <div id="error-school" class="error-message hidden" role="alert"></div>
+                            </div>
+
+                            <!-- NCC Batch -->
+                            <div class="form-group">
+                                <label for="addBatch" class="form-label" lang="en">NCC Batch</label>
+                                <label for="addBatch" class="form-label hidden" lang="np">NCC ब्याच</label>
+                                <select id="addBatch" name="batch" class="form-input" required>
+                                    <option value="">Select Batch</option>
+                                    <!-- Options will be populated dynamically -->
+                                </select>
+                                <div id="error-batch" class="error-message hidden" role="alert"></div>
+                            </div>
+
+                            <!-- Passout Year -->
+                            <div class="form-group">
+                                <label for="addPassoutYear" class="form-label" lang="en">Passout Year</label>
+                                <label for="addPassoutYear" class="form-label hidden" lang="np">पासआउट वर्ष</label>
+                                <select id="addPassoutYear" name="passout_year" class="form-input" required>
+                                    <option value="">Select Year</option>
+                                    <!-- Options will be populated dynamically with years -->
+                                </select>
+                                <div id="error-passout_year" class="error-message hidden" role="alert"></div>
+                            </div>
+
+                            <!-- District -->
+                            <div class="form-group">
+                                <label for="addDistrict" class="form-label" lang="en">District</label>
+                                <label for="addDistrict" class="form-label hidden" lang="np">जिल्ला</label>
+                                <select id="addDistrict" name="district" class="form-input" required>
+                                    <option value="">Select District</option>
+                                    <option value="Palpa">Palpa</option>
+                                    <option value="Rupandehi">Rupandehi</option>
+                                    <option value="Arghakhanchi">Arghakhanchi</option>
+                                    <option value="Kapilvastu">Kapilvastu</option>
+                                    <option value="Nawalparasi West">Nawalparasi (West)</option>
+                                    <option value="Gulmi">Gulmi</option>
+                                    <option value="Dang">Dang</option>
+                                    <option value="Pyuthan">Pyuthan</option>
+                                    <option value="Rolpa">Rolpa</option>
+                                    <option value="Nawalparasi East">Nawalparasi (East)</option>
+                                    <option value="Banke">Banke</option>
+                                    <option value="Bardiya">Bardiya</option>
+                                </select>
+                                <div id="error-district" class="error-message hidden" role="alert"></div>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <!-- Guardian Details Card -->
+                    <fieldset class="bg-primary-light rounded-xl p-3 md:p-6 md:col-span-2">
+                        <legend
+                            class="text-base md:text-lg font-bold text-primary mb-2 md:mb-4 flex items-center gap-2">
+                            <i class="fas fa-user-friends" aria-hidden="true"></i>
+                            <span lang="en">Guardian Details</span>
+                            <span lang="np" class="hidden">अभिभावक विवरण</span>
+                        </legend>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
+                            <!-- Guardian Name -->
+                            <div class="form-group">
+                                <label for="addGuardianName" class="form-label" lang="en">Guardian Name</label>
+                                <label for="addGuardianName" class="form-label hidden" lang="np">अभिभावकको नाम</label>
+                                <input type="text" id="addGuardianName" name="guardian_name" class="form-input" required
+                                    minlength="2" maxlength="100">
+                                <div id="error-guardian_name" class="error-message hidden" role="alert"></div>
+                            </div>
+
+                            <!-- Guardian Contact -->
+                            <div class="form-group">
+                                <label for="addGuardianContact" class="form-label" lang="en">Guardian Contact</label>
+                                <label for="addGuardianContact" class="form-label hidden" lang="np">अभिभावक
+                                    सम्पर्क</label>
+                                <input type="tel" id="addGuardianContact" name="guardian_contact" class="form-input"
+                                    required pattern="[0-9+\-\s()]{7,15}" title="Please enter a valid phone number">
+                                <div id="error-guardian_contact" class="error-message hidden" role="alert"></div>
+                            </div>
+
+                            <!-- Relation -->
+                            <div class="form-group">
+                                <label for="addRelation" class="form-label" lang="en">Relation</label>
+                                <label for="addRelation" class="form-label hidden" lang="np">सम्बन्ध</label>
+                                <select id="addRelation" name="relation" class="form-input" required>
+                                    <option value="">Select Relation</option>
+                                    <option value="Father">Father</option>
+                                    <option value="Mother">Mother</option>
+                                    <option value="Guardian">Guardian</option>
+                                    <option value="Sibling">Sibling</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                                <div id="error-relation" class="error-message hidden" role="alert"></div>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <!-- Timestamp (hidden, auto-filled) -->
+                    <input type="hidden" name="timestamp" id="timestamp">
+
+                    <div class="md:col-span-2 mt-6 flex justify-center">
+                        <button type="submit"
+                            class="btn-primary px-8 py-3 rounded-xl font-bold flex items-center gap-2">
+                            <i class="fas fa-user-plus" aria-hidden="true"></i>
+                            <span lang="en">Register Cadet</span>
+                            <span lang="np" class="hidden">क्याडेट दर्ता गर्नुहोस्</span>
+                        </button>
+                    </div>
+                </form>
+                <div id="cadetFormError" class="error-message font-semibold mb-2 hidden" role="alert"></div>
+            </div>
+        </section>
+
+        <!-- View Cadets -->
+        <section id="viewCadets" class="container mx-auto p-2 md:p-6 hidden mt-14 md:mt-0">
+            <div class="card p-2 md:p-8 max-w-6xl mx-auto">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 md:mb-6 gap-2">
+                    <div>
+                        <h2 class="text-xl md:text-2xl font-bold text-primary" lang="en">Cadet List</h2>
+                        <h2 class="text-xl md:text-2xl font-bold text-primary hidden" lang="np">क्याडेट सूची</h2>
+                        <p class="text-secondary text-sm md:text-base" lang="en">All registered cadets in the system</p>
+                        <p class="text-secondary text-sm md:text-base hidden" lang="np">प्रणालीमा दर्ता भएका सबै
+                            क्याडेटहरू</p>
+                    </div>
+                    <div class="flex gap-2 md:gap-3 mt-2 md:mt-0">
+                        <button onclick="showScreen('dashboard')"
+                            class="btn-secondary px-3 md:px-4 py-2 rounded-lg font-semibold flex items-center gap-2"
+                            aria-label="Go back to dashboard">
+                            <i class="fas fa-arrow-left" aria-hidden="true"></i>
+                            <span lang="en">Back</span>
+                            <span lang="np" class="hidden">फिर्ता</span>
+                        </button>
+                        <button id="exportBtn"
+                            class="btn-primary px-3 md:px-4 py-2 rounded-lg font-semibold flex items-center gap-2">
+                            <i class="fas fa-download" aria-hidden="true"></i>
+                            <span lang="en">Export</span>
+                            <span lang="np" class="hidden">निर्यात गर्नुहोस्</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex flex-col md:flex-row justify-between gap-2 md:gap-4 mb-4 md:mb-6">
+                    <div class="relative w-full md:w-64">
+                        <input type="text" id="searchInput" placeholder="Search cadets..."
+                            class="form-input pl-9 md:pl-10">
+                        <i class="fas fa-search absolute left-3 top-3 text-primary"></i>
+                    </div>
+                    <div class="flex gap-2 md:gap-3">
+                        <select id="districtFilter" class="form-input">
+                            <option value="">All Districts</option>
+                            <!-- District options will be populated dynamically -->
+                        </select>
+                        <select id="rankFilter" class="form-input">
+                            <option value="">All Ranks</option>
+                            <!-- Rank options will be populated dynamically -->
+                        </select>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto rounded-xl shadow-sm border border-gray-200">
+                    <table class="min-w-full bg-white text-sm md:text-base" aria-describedby="tableSummary">
+                        <caption id="tableSummary" class="sr-only">List of cadets with their details and actions
+                        </caption>
+                        <thead>
+                            <tr class="bg-primary-light text-primary">
+                                <th scope="col"
+                                    class="py-2 md:py-4 px-2 md:px-6 text-left font-semibold cursor-pointer sortable"
+                                    data-sort="cadet_number">
+                                    Cadet No. <i class="fas fa-sort ml-1" aria-hidden="true"></i>
+                                </th>
+                                <th scope="col"
+                                    class="py-2 md:py-4 px-2 md:px-6 text-left font-semibold cursor-pointer sortable"
+                                    data-sort="name">
+                                    Name <i class="fas fa-sort ml-1" aria-hidden="true"></i>
+                                </th>
+                                <th scope="col"
+                                    class="py-2 md:py-4 px-2 md:px-6 text-left font-semibold cursor-pointer sortable"
+                                    data-sort="rank">
+                                    Rank <i class="fas fa-sort ml-1" aria-hidden="true"></i>
+                                </th>
+                                <th scope="col" class="py-2 md:py-4 px-2 md:px-6 text-left font-semibold">Contact</th>
+                                <th scope="col"
+                                    class="py-2 md:py-4 px-2 md:px-6 text-left font-semibold cursor-pointer sortable"
+                                    data-sort="gender">
+                                    Gender <i class="fas fa-sort ml-1" aria-hidden="true"></i>
+                                </th>
+                                <th scope="col"
+                                    class="py-2 md:py-4 px-2 md:px-6 text-left font-semibold cursor-pointer sortable"
+                                    data-sort="school">
+                                    School <i class="fas fa-sort ml-1" aria-hidden="true"></i>
+                                </th>
+                                <th scope="col"
+                                    class="py-2 md:py-4 px-2 md:px-6 text-left font-semibold cursor-pointer sortable"
+                                    data-sort="district">
+                                    District <i class="fas fa-sort ml-1" aria-hidden="true"></i>
+                                </th>
+                                <th scope="col" class="py-2 md:py-4 px-2 md:px-6 text-left font-semibold">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cadetTableBody" class="divide-y divide-gray-100">
+                            <!-- Table rows will be populated dynamically -->
+                            <tr>
+                                <td colspan="8" class="py-8 text-center text-secondary">
+                                    <div class="loading-spinner mx-auto mb-2"></div>
+                                    <p>Loading cadets...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="flex flex-col md:flex-row justify-between items-center mt-4 md:mt-6 gap-2">
+                    <div class="text-secondary text-xs md:text-base" id="paginationInfo">
+                        <span lang="en">Loading...</span>
+                        <span lang="np" class="hidden">लोड हुँदैछ...</span>
+                    </div>
+                    <div class="flex gap-1 md:gap-2" id="paginationControls">
+                        <!-- Pagination controls will be populated dynamically -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Military-style Cadet View Modal -->
+        <div id="cadetModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="cadetModalTitle">
+            <div class="modal-content max-w-xl w-full relative p-6 md:p-8">
+                <button id="closeCadetModal" class="modal-close" aria-label="Close modal">
+                    <i class="fas fa-times" aria-hidden="true"></i>
+                </button>
+                <div class="flex items-center gap-6 mb-6">
+                    <div class="avatar">
+                        <i class="fas fa-user-shield text-primary text-4xl md:text-5xl" aria-hidden="true"></i>
+                    </div>
+                    <div>
+                        <h2 id="cadetModalName" class="text-2xl font-extrabold text-primary mb-1"></h2>
+                        <div class="mb-2">
+                            <strong>Cadet No.:</strong>
+                            <span id="cadetModalCadetNo"></span>
+                        </div>
+                        <span id="cadetModalRank" class="badge badge-primary"></span>
+                        <span id="cadetModalDistrict" class="badge badge-secondary ml-2"></span>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-primary font-medium">
+                    <div><strong>Contact:</strong> <span id="cadetModalContact"></span></div>
+                    <div><strong>Gender:</strong> <span id="cadetModalGender"></span></div>
+                    <div><strong>School:</strong> <span id="cadetModalSchool"></span></div>
+                    <div><strong>Batch:</strong> <span id="cadetModalBatch"></span></div>
+                    <div><strong>Passout Year:</strong> <span id="cadetModalPassout"></span></div>
+                    <div><strong>Email:</strong> <span id="cadetModalEmail"></span></div>
+                    <div class="md:col-span-2"><strong>Address:</strong> <span id="cadetModalAddress"></span></div>
+                </div>
+                <div class="mt-6 border-t pt-4">
+                    <h3 class="text-lg font-bold text-primary mb-2 flex items-center gap-2">
+                        <i class="fas fa-user-shield" aria-hidden="true"></i> Guardian Details
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-primary font-medium">
+                        <div><strong>Name:</strong> <span id="cadetModalGuardianName"></span></div>
+                        <div><strong>Contact:</strong> <span id="cadetModalGuardianContact"></span></div>
+                        <div><strong>Relation:</strong> <span id="cadetModalRelation"></span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Cadet Modal -->
+        <div id="editCadetModal" class="modal hidden" role="dialog" aria-modal="true"
+            aria-labelledby="editCadetModalTitle">
+            <div class="modal-content max-w-2xl w-full relative p-4 md:p-8 max-h-[90vh] overflow-y-auto">
+                <button id="closeEditCadetModal" class="modal-close" aria-label="Close modal">
+                    <i class="fas fa-times" aria-hidden="true"></i>
+                </button>
+                <h2 id="editCadetModalTitle"
+                    class="text-xl md:text-2xl font-bold text-primary mb-4 flex items-center gap-2">
+                    <i class="fas fa-user-edit" aria-hidden="true"></i>
+                    Edit Cadet
+                </h2>
+                <form id="editCadetForm" class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6" novalidate>
+                    <input type="hidden" name="original_cadet_no" id="editOriginalCadetNo">
+                    <input type="hidden" name="cadet_id" id="editCadetId">
+
+                    <!-- Form fields for editing cadet (similar to add form but with pre-filled values) -->
+                    <!-- Cadet Number -->
+                    <div class="form-group md:col-span-1">
+                        <label for="editCadetNo" class="form-label">Cadet Number</label>
+                        <input type="text" id="editCadetNo" name="cadet_no" class="form-input" required
+                            pattern="[A-Za-z0-9-]+"
+                            title="Cadet number should contain only letters, numbers, and hyphens">
+                        <div id="error-edit_cadet_no" class="error-message hidden" role="alert"></div>
+                    </div>
+
+                    <!-- Full Name -->
+                    <div class="form-group md:col-span-1">
+                        <label for="editName" class="form-label">Full Name</label>
+                        <input type="text" id="editName" name="name" class="form-input" required minlength="2"
+                            maxlength="100">
+                        <div id="error-edit_name" class="error-message hidden" role="alert"></div>
+                    </div>
+
+                    <!-- Rank -->
+                    <div class="form-group">
+                        <label for="editRank" class="form-label">Rank</label>
+                        <select id="editRank" name="rank" class="form-input" required>
+                            <option value="">Select Rank</option>
+                            <option value="Cadet">Cadet</option>
+                            <option value="Lance Corporal">Lance Corporal</option>
+                            <option value="Corporal">Corporal</option>
+                            <option value="Sergeant">Sergeant</option>
+                            <option value="Staff Sergeant">Staff Sergeant</option>
+                            <option value="PJUO">PJUO</option>
+                            <option value="CJUO">CJUO</option>
+                            <option value="SUO">SUO</option>
+                        </select>
+                        <div id="error-edit_rank" class="error-message hidden" role="alert"></div>
+                    </div>
+
+                    <!-- Contact -->
+                    <div class="form-group">
+                        <label for="editContact" class="form-label">Contact</label>
+                        <input type="tel" id="editContact" name="contact" class="form-input" required
+                            pattern="[0-9+\-\s()]{7,15}" title="Please enter a valid phone number">
+                        <div id="error-edit_contact" class="error-message hidden" role="alert"></div>
+                    </div>
+
+                    <!-- Gender -->
+                    <div class="form-group">
+                        <label for="editGender" class="form-label">Gender</label>
+                        <select id="editGender" name="gender" class="form-input" required>
+                            <option value="">Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <div id="error-edit_gender" class="error-message hidden" role="alert"></div>
+                    </div>
+
+                    <!-- School Name -->
+                    <div class="form-group">
+                        <label for="editSchool" class="form-label">School Name</label>
+                        <select id="editSchool" name="school" class="form-input" required>
+                            <option value="">Select School</option>
+                            <!-- Options will be populated dynamically -->
+                        </select>
+                        <div id="error-edit_school" class="error-message hidden" role="alert"></div>
+                    </div>
+
+                    <!-- Batch -->
+                    <div class="form-group">
+                        <label for="editBatch" class="form-label">Batch</label>
+                        <select id="editBatch" name="batch" class="form-input" required>
+                            <option value="">Select Batch</option>
+                            <!-- Options will be populated dynamically -->
+                        </select>
+                        <div id="error-edit_batch" class="error-message hidden" role="alert"></div>
+                    </div>
+
+                    <!-- Passout Year -->
+                    <div class="form-group">
+                        <label for="editPassoutYear" class="form-label">Passout Year</label>
+                        <select id="editPassoutYear" name="passout_year" class="form-input" required>
+                            <option value="">Select Year</option>
+                            <!-- Options will be populated dynamically with years -->
+                        </select>
+                        <div id="error-edit_passout_year" class="error-message hidden" role="alert"></div>
+                    </div>
+
+                    <!-- District -->
+                    <div class="form-group">
+                        <label for="editDistrict" class="form-label">District</label>
+                        <select id="editDistrict" name="district" class="form-input" required>
+                            <option value="">Select District</option>
+                            <!-- District options will be populated dynamically -->
+                        </select>
+                        <div id="error-edit_district" class="error-message hidden" role="alert"></div>
+                    </div>
+
+                    <!-- Address -->
+                    <div class="form-group md:col-span-2">
+                        <label for="editAddress" class="form-label">Address</label>
+                        <input type="text" id="editAddress" name="address" class="form-input" required minlength="5"
+                            maxlength="200">
+                        <div id="error-edit_address" class="error-message hidden" role="alert"></div>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="form-group md:col-span-2">
+                        <label for="editEmail" class="form-label">Email</label>
+                        <input type="email" id="editEmail" name="email" class="form-input" required>
+                        <div id="error-edit_email" class="error-message hidden" role="alert"></div>
+                    </div>
+
+                    <!-- Guardian Name -->
+                    <div class="form-group">
+                        <label for="editGuardianName" class="form-label">Guardian Name</label>
+                        <input type="text" id="editGuardianName" name="guardian_name" class="form-input" required
+                            minlength="2" maxlength="100">
+                        <div id="error-edit_guardian_name" class="error-message hidden" role="alert"></div>
+                    </div>
+
+                    <!-- Guardian Contact -->
+                    <div class="form-group">
+                        <label for="editGuardianContact" class="form-label">Guardian Contact</label>
+                        <input type="tel" id="editGuardianContact" name="guardian_contact" class="form-input" required
+                            pattern="[0-9+\-\s()]{7,15}" title="Please enter a valid phone number">
+                        <div id="error-edit_guardian_contact" class="error-message hidden" role="alert"></div>
+                    </div>
+
+                    <!-- Relation -->
+                    <div class="form-group">
+                        <label for="editRelation" class="form-label">Relation</label>
+                        <select id="editRelation" name="relation" class="form-input" required>
+                            <option value="">Select Relation</option>
+                            <option value="Father">Father</option>
+                            <option value="Mother">Mother</option>
+                            <option value="Guardian">Guardian</option>
+                            <option value="Sibling">Sibling</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <div id="error-edit_relation" class="error-message hidden" role="alert"></div>
+                    </div>
+
+                    <div class="md:col-span-2 mt-4 flex justify-center">
+                        <button type="submit"
+                            class="btn-primary px-8 py-3 rounded-xl font-bold flex items-center gap-2">
+                            <i class="fas fa-save" aria-hidden="true"></i>
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div id="deleteModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+            <div class="modal-content max-w-md w-full relative p-6">
+                <button id="closeDeleteModal" class="modal-close" aria-label="Close modal">
+                    <i class="fas fa-times" aria-hidden="true"></i>
+                </button>
+                <div class="text-center">
+                    <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                        <i class="fas fa-exclamation-triangle text-red-600 text-xl" aria-hidden="true"></i>
+                    </div>
+                    <h3 id="deleteModalTitle" class="text-lg font-medium text-primary mt-4">Delete Cadet</h3>
+                    <div class="mt-2">
+                        <p class="text-sm text-secondary">
+                            Are you sure you want to delete <span id="deleteCadetName" class="font-semibold"></span>?
+                            This action cannot be undone.
+                        </p>
+                    </div>
+                </div>
+                <div class="mt-5 sm:mt-6 flex gap-3">
+                    <button id="cancelDelete" type="button" class="btn-secondary flex-1 py-2 rounded-lg">
+                        Cancel
+                    </button>
+                    <button id="confirmDelete" type="button" class="btn-danger flex-1 py-2 rounded-lg">
+                        Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // API Base URL - should be configured based on environment
+        const API_BASE_URL = 'http://localhost:8000/api'; // Change this in production
+
+        // Global state
+        let currentPage = 1;
+        let itemsPerPage = 10;
+        let totalPages = 1;
+        let totalItems = 0;
+        let sortField = 'cadet_number';
+        let sortDirection = 'asc';
+        let currentFilters = {};
+        let allCadets = [];
+        let schools = [];
+        let batches = [];
+
+        // DOM Elements
+        const elements = {
+            addCadetScreen: document.getElementById('addCadet'),
+            viewCadetsScreen: document.getElementById('viewCadets'),
+            cadetForm: document.getElementById('cadetForm'),
+            cadetTableBody: document.getElementById('cadetTableBody'),
+            searchInput: document.getElementById('searchInput'),
+            districtFilter: document.getElementById('districtFilter'),
+            rankFilter: document.getElementById('rankFilter'),
+            cadetModal: document.getElementById('cadetModal'),
+            closeCadetModal: document.getElementById('closeCadetModal'),
+            editCadetModal: document.getElementById('editCadetModal'),
+            closeEditCadetModal: document.getElementById('closeEditCadetModal'),
+            editCadetForm: document.getElementById('editCadetForm'),
+            deleteModal: document.getElementById('deleteModal'),
+            closeDeleteModal: document.getElementById('closeDeleteModal'),
+            cancelDelete: document.getElementById('cancelDelete'),
+            confirmDelete: document.getElementById('confirmDelete'),
+            paginationInfo: document.getElementById('paginationInfo'),
+            paginationControls: document.getElementById('paginationControls'),
+            exportBtn: document.getElementById('exportBtn')
+        };
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function () {
+            initializeApp();
+        });
+
+        function initializeApp() {
+            // Load initial data
+            loadCadets();
+            loadSchools();
+            loadBatches();
+            populateYearDropdown();
+            populateDistrictFilter();
+            populateRankFilter();
+
+            // Set up event listeners
+            setupEventListeners();
+        }
+
+        function setupEventListeners() {
+            // Form submission
+            elements.cadetForm.addEventListener('submit', handleCadetCreate);
+            elements.editCadetForm.addEventListener('submit', handleCadetUpdate);
+
+            // Search and filter
+            elements.searchInput.addEventListener('input', debounce(handleSearch, 300));
+            elements.districtFilter.addEventListener('change', handleFilter);
+            elements.rankFilter.addEventListener('change', handleFilter);
+
+            // Modal controls
+            elements.closeCadetModal.addEventListener('click', () => hideModal('cadetModal'));
+            elements.closeEditCadetModal.addEventListener('click', () => hideModal('editCadetModal'));
+            elements.closeDeleteModal.addEventListener('click', () => hideModal('deleteModal'));
+            elements.cancelDelete.addEventListener('click', () => hideModal('deleteModal'));
+
+            // Delete confirmation
+            elements.confirmDelete.addEventListener('click', handleCadetDelete);
+
+            // Export functionality
+            elements.exportBtn.addEventListener('click', handleExport);
+
+            // Sortable table headers
+            document.querySelectorAll('.sortable').forEach(header => {
+                header.addEventListener('click', () => {
+                    const field = header.dataset.sort;
+                    handleSort(field);
+                });
+            });
+
+            // Close modals on outside click
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        hideModal(modal.id);
+                    }
+                });
+            });
+
+            // Close modals on Escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    hideModal('cadetModal');
+                    hideModal('editCadetModal');
+                    hideModal('deleteModal');
+                }
+            });
+        }
+
+        // API Functions
+        async function loadCadets() {
+            try {
+                showLoading();
+                const params = new URLSearchParams({
+                    page: currentPage,
+                    limit: itemsPerPage,
+                    sort: sortField,
+                    order: sortDirection,
+                    ...currentFilters
+                });
+
+                const response = await fetch(`${API_BASE_URL}/cadets?${params}`);
+                if (!response.ok) throw new Error('Failed to fetch cadets');
+
+                const data = await response.json();
+                allCadets = data.items;
+                totalItems = data.total;
+                totalPages = Math.ceil(totalItems / itemsPerPage);
+
+                renderCadetTable();
+                updatePagination();
+            } catch (error) {
+                showToast('Error loading cadets: ' + error.message, 'error');
+                console.error('Error loading cadets:', error);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function loadSchools() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/schools`);
+                if (!response.ok) throw new Error('Failed to fetch schools');
+
+                schools = await response.json();
+                populateSchoolDropdowns();
+            } catch (error) {
+                console.error('Error loading schools:', error);
+            }
+        }
+
+        async function loadBatches() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/batches`);
+                if (!response.ok) throw new Error('Failed to fetch batches');
+
+                batches = await response.json();
+                populateBatchDropdowns();
+            } catch (error) {
+                console.error('Error loading batches:', error);
+            }
+        }
+
+        async function createCadet(cadetData) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/cadets`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(cadetData)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || 'Failed to create cadet');
+                }
+
+                return await response.json();
+            } catch (error) {
+                throw error;
+            }
+        }
+
+        async function updateCadet(cadetId, cadetData) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/cadets/${cadetId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(cadetData)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || 'Failed to update cadet');
+                }
+
+                return await response.json();
+            } catch (error) {
+                throw error;
+            }
+        }
+
+        async function deleteCadet(cadetId) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/cadets/${cadetId}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || 'Failed to delete cadet');
+                }
+
+                return true;
+            } catch (error) {
+                throw error;
+            }
+        }
+
+        async function exportCadets(format = 'csv') {
+            try {
+                const params = new URLSearchParams({
+                    format,
+                    ...currentFilters
+                });
+
+                const response = await fetch(`${API_BASE_URL}/cadets/export?${params}`);
+                if (!response.ok) throw new Error('Failed to export cadets');
+
+                // Handle file download
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `cadets_export.${format}`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            } catch (error) {
+                showToast('Error exporting cadets: ' + error.message, 'error');
+                console.error('Error exporting cadets:', error);
+            }
+        }
+
+        // UI Functions
+        function showScreen(screenName) {
+            // Hide all screens
+            elements.addCadetScreen.classList.add('hidden');
+            elements.viewCadetsScreen.classList.add('hidden');
+
+            // Show requested screen
+            if (screenName === 'addCadet') {
+                elements.addCadetScreen.classList.remove('hidden');
+                resetForm(elements.cadetForm);
+            } else if (screenName === 'viewCadets') {
+                elements.viewCadetsScreen.classList.remove('hidden');
+                loadCadets();
+            } else if (screenName === 'dashboard') {
+                // This would navigate to the main dashboard
+                // For now, we'll just show the view cadets screen
+                elements.viewCadetsScreen.classList.remove('hidden');
+            }
+        }
+
+        function showModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        }
+
+        function hideModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+            document.body.style.overflow = ''; // Re-enable scrolling
+        }
+
+        function renderCadetTable() {
+            const tableBody = elements.cadetTableBody;
+            tableBody.innerHTML = '';
+
+            if (allCadets.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="py-8 text-center text-secondary">
+                            <i class="fas fa-inbox text-4xl mb-2 text-gray-300" aria-hidden="true"></i>
+                            <p>No cadets found</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            allCadets.forEach(cadet => {
+                const row = document.createElement('tr');
+                row.className = 'table-row';
+                row.innerHTML = `
+                    <td class="py-3 px-2 md:px-6">${cadet.cadet_number || 'N/A'}</td>
+                    <td class="py-3 px-2 md:px-6 font-medium">${cadet.full_name_en || 'N/A'}</td>
+                    <td class="py-3 px-2 md:px-6">${cadet.rank || 'N/A'}</td>
+                    <td class="py-3 px-2 md:px-6">${cadet.phone || 'N/A'}</td>
+                    <td class="py-3 px-2 md:px-6">${cadet.gender || 'N/A'}</td>
+                    <td class="py-3 px-2 md:px-6">${cadet.school_name || 'N/A'}</td>
+                    <td class="py-3 px-2 md:px-6">${cadet.district_name || 'N/A'}</td>
+                    <td class="py-3 px-2 md:px-6">
+                        <div class="flex gap-2">
+                            <button class="text-blue-600 hover:text-blue-800 view-btn" data-id="${cadet.id}" aria-label="View cadet details">
+                                <i class="fas fa-eye" aria-hidden="true"></i>
+                            </button>
+                            <button class="text-green-600 hover:text-green-800 edit-btn" data-id="${cadet.id}" aria-label="Edit cadet">
+                                <i class="fas fa-edit" aria-hidden="true"></i>
+                            </button>
+                            <button class="text-red-600 hover:text-red-800 delete-btn" data-id="${cadet.id}" aria-label="Delete cadet">
+                                <i class="fas fa-trash" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+
+            // Add event listeners to action buttons
+            tableBody.querySelectorAll('.view-btn').forEach(btn => {
+                btn.addEventListener('click', () => showCadetDetails(btn.dataset.id));
+            });
+
+            tableBody.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', () => openEditCadetModal(btn.dataset.id));
+            });
+
+            tableBody.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', () => openDeleteModal(btn.dataset.id));
+            });
+        }
+
+        function updatePagination() {
+            const startItem = (currentPage - 1) * itemsPerPage + 1;
+            const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+
+            // Update pagination info
+            elements.paginationInfo.innerHTML = `
+                <span lang="en">Showing ${startItem} to ${endItem} of ${totalItems} entries</span>
+                <span lang="np" class="hidden">${startItem} देखि ${endItem} सम्म ${totalItems} प्रविष्टिहरू देखाइएको छ</span>
+            `;
+
+            // Update pagination controls
+            let paginationHTML = '';
+
+            if (totalPages > 1) {
+                // Previous button
+                paginationHTML += `
+                    <button class="pagination-btn ${currentPage === 1 ? 'disabled' : ''}" 
+                            ${currentPage === 1 ? 'disabled' : ''} data-page="${currentPage - 1}">
+                        <i class="fas fa-chevron-left" aria-hidden="true"></i>
+                    </button>
+                `;
+
+                // Page numbers
+                const startPage = Math.max(1, currentPage - 2);
+                const endPage = Math.min(totalPages, startPage + 4);
+
+                for (let i = startPage; i <= endPage; i++) {
+                    paginationHTML += `
+                        <button class="pagination-btn ${i === currentPage ? 'active' : ''}" data-page="${i}">
+                            ${i}
+                        </button>
+                    `;
+                }
+
+                // Next button
+                paginationHTML += `
+                    <button class="pagination-btn ${currentPage === totalPages ? 'disabled' : ''}" 
+                            ${currentPage === totalPages ? 'disabled' : ''} data-page="${currentPage + 1}">
+                        <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                    </button>
+                `;
+            }
+
+            elements.paginationControls.innerHTML = paginationHTML;
+
+            // Add event listeners to pagination buttons
+            elements.paginationControls.querySelectorAll('.pagination-btn:not(.disabled)').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    currentPage = parseInt(btn.dataset.page);
+                    loadCadets();
+                });
+            });
+        }
+
+        function showCadetDetails(cadetId) {
+            const cadet = allCadets.find(c => c.id == cadetId);
+            if (!cadet) return;
+
+            // Populate modal with cadet data
+            document.getElementById('cadetModalName').textContent = cadet.full_name_en || 'N/A';
+            document.getElementById('cadetModalCadetNo').textContent = cadet.cadet_number || 'N/A';
+            document.getElementById('cadetModalRank').textContent = cadet.rank || 'N/A';
+            document.getElementById('cadetModalDistrict').textContent = cadet.district_name || 'N/A';
+            document.getElementById('cadetModalContact').textContent = cadet.phone || 'N/A';
+            document.getElementById('cadetModalGender').textContent = cadet.gender || 'N/A';
+            document.getElementById('cadetModalSchool').textContent = cadet.school_name || 'N/A';
+            document.getElementById('cadetModalBatch').textContent = cadet.batch_name || 'N/A';
+            document.getElementById('cadetModalPassout').textContent = cadet.passout_year || 'N/A';
+            document.getElementById('cadetModalEmail').textContent = cadet.email || 'N/A';
+            document.getElementById('cadetModalAddress').textContent = cadet.address || 'N/A';
+            document.getElementById('cadetModalGuardianName').textContent = cadet.guardian_name || 'N/A';
+            document.getElementById('cadetModalGuardianContact').textContent = cadet.guardian_contact || 'N/A';
+            document.getElementById('cadetModalRelation').textContent = cadet.relation || 'N/A';
+
+            showModal('cadetModal');
+        }
+
+        function openEditCadetModal(cadetId) {
+            const cadet = allCadets.find(c => c.id == cadetId);
+            if (!cadet) return;
+
+            // Populate form with cadet data
+            document.getElementById('editCadetId').value = cadet.id;
+            document.getElementById('editOriginalCadetNo').value = cadet.cadet_number;
+            document.getElementById('editCadetNo').value = cadet.cadet_number || '';
+            document.getElementById('editName').value = cadet.full_name_en || '';
+            document.getElementById('editRank').value = cadet.rank || '';
+            document.getElementById('editContact').value = cadet.phone || '';
+            document.getElementById('editGender').value = cadet.gender || '';
+            document.getElementById('editSchool').value = cadet.school_id || '';
+            document.getElementById('editBatch').value = cadet.batch_id || '';
+            document.getElementById('editPassoutYear').value = cadet.passout_year || '';
+            document.getElementById('editDistrict').value = cadet.district_id || '';
+            document.getElementById('editAddress').value = cadet.address || '';
+            document.getElementById('editEmail').value = cadet.email || '';
+            document.getElementById('editGuardianName').value = cadet.guardian_name || '';
+            document.getElementById('editGuardianContact').value = cadet.guardian_contact || '';
+            document.getElementById('editRelation').value = cadet.relation || '';
+
+            showModal('editCadetModal');
+        }
+
+        function openDeleteModal(cadetId) {
+            const cadet = allCadets.find(c => c.id == cadetId);
+            if (!cadet) return;
+
+            document.getElementById('deleteCadetName').textContent = cadet.full_name_en || 'this cadet';
+            elements.confirmDelete.dataset.id = cadetId;
+
+            showModal('deleteModal');
+        }
+
+        function showLoading() {
+            // Show loading state in table
+            elements.cadetTableBody.innerHTML = `
+                <tr>
+                    <td colspan="8" class="py-8 text-center text-secondary">
+                        <div class="loading-spinner mx-auto mb-2"></div>
+                        <p>Loading cadets...</p>
+                    </td>
+                </tr>
+            `;
+        }
+
+        function hideLoading() {
+            // Remove loading state if needed
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            toast.setAttribute('role', 'alert');
+
+            elements.toastContainer.appendChild(toast);
+
+            // Show toast
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 10);
+
+            // Hide toast after delay
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    elements.toastContainer.removeChild(toast);
+                }, 300);
+            }, 3000);
+        }
+
+        function resetForm(form) {
+            form.reset();
+            clearValidationErrors(form);
+        }
+
+        function clearValidationErrors(form) {
+            const errorElements = form.querySelectorAll('.error-message');
+            errorElements.forEach(el => {
+                el.classList.add('hidden');
+                el.textContent = '';
+            });
+        }
+
+        function showValidationError(fieldName, message) {
+            const errorElement = document.getElementById(`error-${fieldName}`);
+            if (errorElement) {
+                errorElement.textContent = message;
+                errorElement.classList.remove('hidden');
+            }
+        }
+
+        // Event Handlers
+        async function handleCadetCreate(e) {
+            e.preventDefault();
+
+            const formData = new FormData(elements.cadetForm);
+            const cadetData = Object.fromEntries(formData.entries());
+
+            // Basic validation
+            if (!validateCadetForm(cadetData)) {
+                return;
+            }
+
+            try {
+                // Show loading state
+                const submitBtn = elements.cadetForm.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<div class="loading-spinner"></div> Processing...';
+                submitBtn.disabled = true;
+
+                const result = await createCadet(cadetData);
+
+                showToast('Cadet created successfully!', 'success');
+                resetForm(elements.cadetForm);
+                showScreen('viewCadets');
+            } catch (error) {
+                showToast('Error creating cadet: ' + error.message, 'error');
+                console.error('Error creating cadet:', error);
+
+                // Handle validation errors from server
+                if (error.message.includes('duplicate')) {
+                    showValidationError('cadet_no', 'Cadet number already exists');
+                }
+            } finally {
+                // Restore button state
+                const submitBtn = elements.cadetForm.querySelector('button[type="submit"]');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        }
+
+        async function handleCadetUpdate(e) {
+            e.preventDefault();
+
+            const formData = new FormData(elements.editCadetForm);
+            const cadetData = Object.fromEntries(formData.entries());
+            const cadetId = document.getElementById('editCadetId').value;
+
+            // Basic validation
+            if (!validateCadetForm(cadetData)) {
+                return;
+            }
+
+            try {
+                // Show loading state
+                const submitBtn = elements.editCadetForm.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<div class="loading-spinner"></div> Saving...';
+                submitBtn.disabled = true;
+
+                const result = await updateCadet(cadetId, cadetData);
+
+                showToast('Cadet updated successfully!', 'success');
+                hideModal('editCadetModal');
+                loadCadets(); // Refresh the list
+            } catch (error) {
+                showToast('Error updating cadet: ' + error.message, 'error');
+                console.error('Error updating cadet:', error);
+
+                // Handle validation errors from server
+                if (error.message.includes('duplicate')) {
+                    showValidationError('edit_cadet_no', 'Cadet number already exists');
+                }
+            } finally {
+                // Restore button state
+                const submitBtn = elements.editCadetForm.querySelector('button[type="submit"]');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        }
+
+        async function handleCadetDelete() {
+            const cadetId = elements.confirmDelete.dataset.id;
+
+            try {
+                // Show loading state
+                elements.confirmDelete.innerHTML = '<div class="loading-spinner"></div> Deleting...';
+                elements.confirmDelete.disabled = true;
+
+                const result = await deleteCadet(cadetId);
+
+                showToast('Cadet deleted successfully!', 'success');
+                hideModal('deleteModal');
+                loadCadets(); // Refresh the list
+            } catch (error) {
+                showToast('Error deleting cadet: ' + error.message, 'error');
+                console.error('Error deleting cadet:', error);
+            } finally {
+                // Restore button state
+                elements.confirmDelete.innerHTML = 'Delete';
+                elements.confirmDelete.disabled = false;
+            }
+        }
+
+        function handleSearch() {
+            const searchTerm = elements.searchInput.value.trim();
+            if (searchTerm) {
+                currentFilters.search = searchTerm;
+            } else {
+                delete currentFilters.search;
+            }
+
+            currentPage = 1;
+            loadCadets();
+        }
+
+        function handleFilter() {
+            const district = elements.districtFilter.value;
+            const rank = elements.rankFilter.value;
+
+            if (district) {
+                currentFilters.district = district;
+            } else {
+                delete currentFilters.district;
+            }
+
+            if (rank) {
+                currentFilters.rank = rank;
+            } else {
+                delete currentFilters.rank;
+            }
+
+            currentPage = 1;
+            loadCadets();
+        }
+
+        function handleSort(field) {
+            if (sortField === field) {
+                // Toggle direction if same field
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                // New field, default to ascending
+                sortField = field;
+                sortDirection = 'asc';
+            }
+
+            // Update UI to show sort indicator
+            document.querySelectorAll('.sortable i').forEach(icon => {
+                icon.className = 'fas fa-sort ml-1';
+            });
+
+            const currentHeader = document.querySelector(`.sortable[data-sort="${field}"] i`);
+            if (currentHeader) {
+                currentHeader.className = `fas fa-sort-${sortDirection === 'asc' ? 'up' : 'down'} ml-1`;
+            }
+
+            loadCadets();
+        }
+
+        function handleExport() {
+            exportCadets('csv'); // Default to CSV export
+        }
+
+        // Utility Functions
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        function validateCadetForm(data) {
+            let isValid = true;
+            clearValidationErrors(document.getElementById('cadetForm'));
+
+            // Cadet number validation
+            if (!data.cadet_no || !/^[A-Za-z0-9-]+$/.test(data.cadet_no)) {
+                showValidationError('cadet_no', 'Cadet number is required and should contain only letters, numbers, and hyphens');
+                isValid = false;
+            }
+
+            // Name validation
+            if (!data.name || data.name.length < 2) {
+                showValidationError('name', 'Name is required and should be at least 2 characters long');
+                isValid = false;
+            }
+
+            // Email validation
+            if (!data.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+                showValidationError('email', 'Please enter a valid email address');
+                isValid = false;
+            }
+
+            // Phone validation
+            if (!data.contact || !/^[0-9+\-\s()]{7,15}$/.test(data.contact)) {
+                showValidationError('contact', 'Please enter a valid phone number');
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        function populateSchoolDropdowns() {
+            const schoolSelects = document.querySelectorAll('select[name="school"]');
+            schoolSelects.forEach(select => {
+                // Clear existing options except the first one
+                while (select.options.length > 1) {
+                    select.remove(1);
+                }
+
+                // Add new options
+                schools.forEach(school => {
+                    const option = document.createElement('option');
+                    option.value = school.id;
+                    option.textContent = school.name;
+                    select.appendChild(option);
+                });
+            });
+        }
+
+        function populateBatchDropdowns() {
+            const batchSelects = document.querySelectorAll('select[name="batch"]');
+            batchSelects.forEach(select => {
+                // Clear existing options except the first one
+                while (select.options.length > 1) {
+                    select.remove(1);
+                }
+
+                // Add new options
+                batches.forEach(batch => {
+                    const option = document.createElement('option');
+                    option.value = batch.id;
+                    option.textContent = batch.name;
+                    select.appendChild(option);
+                });
+            });
+        }
+
+        function populateYearDropdown() {
+            const yearSelects = document.querySelectorAll('select[name="passout_year"]');
+            const currentYear = new Date().getFullYear();
+
+            yearSelects.forEach(select => {
+                // Clear existing options except the first one
+                while (select.options.length > 1) {
+                    select.remove(1);
+                }
+
+                // Add years from current year to 10 years back
+                for (let year = currentYear; year >= currentYear - 10; year--) {
+                    const option = document.createElement('option');
+                    option.value = year;
+                    option.textContent = year;
+                    select.appendChild(option);
+                }
+            });
+        }
+
+        function populateDistrictFilter() {
+            const districts = [
+                'Palpa', 'Rupandehi', 'Arghakhanchi', 'Kapilvastu',
+                'Nawalparasi West', 'Gulmi', 'Dang', 'Pyuthan',
+                'Rolpa', 'Nawalparasi East', 'Banke', 'Bardiya'
+            ];
+
+            districts.forEach(district => {
+                const option = document.createElement('option');
+                option.value = district;
+                option.textContent = district;
+                elements.districtFilter.appendChild(option);
+            });
+        }
+
+        function populateRankFilter() {
+            const ranks = [
+                'Cadet', 'Lance Corporal', 'Corporal', 'Sergeant',
+                'Staff Sergeant', 'PJUO', 'CJUO', 'SUO'
+            ];
+
+            ranks.forEach(rank => {
+                const option = document.createElement('option');
+                option.value = rank;
+                option.textContent = rank;
+                elements.rankFilter.appendChild(option);
+            });
+        }
+    </script>
+</body>
+
+</html>

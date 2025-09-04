@@ -10,6 +10,7 @@ body {
     font-family: "Poppins", sans-serif;
     background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
     min-height: 100vh;
+    margin: 0;
 }
 
 .card {
@@ -81,6 +82,7 @@ body {
     background-color: #e5e7eb;
 }
 
+/* Modal / Form */
 .form-container {
     background: rgba(0, 0, 0, 0.5);
     position: fixed;
@@ -89,10 +91,14 @@ body {
     right: 0;
     bottom: 0;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
+    /* changed from center */
     justify-content: center;
     z-index: 1000;
-    padding: 20px;
+    padding: 40px 20px;
+    /* spacing for top/bottom */
+    overflow-y: auto;
+    /* allow scroll if viewport small */
 }
 
 .form-card {
@@ -103,6 +109,8 @@ body {
     max-width: 1000px;
     max-height: 90vh;
     overflow-y: auto;
+    display: flex;
+    flex-direction: column;
 }
 
 .form-header {
@@ -119,6 +127,7 @@ body {
 
 .form-body {
     padding: 30px;
+    overflow-y: auto;
 }
 
 .form-section {
@@ -229,6 +238,46 @@ body {
     }
 
     .form-container {
-        padding: 10px;
+        padding: 20px 10px;
     }
+
+    .form-card {
+        max-height: 95vh;
+    }
+}
+
+.error-message {
+    display: none;
+    color: #e53e3e;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+.border-red-500 {
+    border-color: #e53e3e;
+}
+
+.hidden {
+    display: none;
+}
+
+/* Responsive design improvements */
+@media (max-width: 768px) {
+    .session-row {
+        grid-template-columns: 1fr !important;
+    }
+
+    .form-card {
+        margin: 1rem;
+        width: calc(100% - 2rem);
+    }
+}
+
+/* Animation for modals */
+.form-container {
+    transition: opacity 0.3s ease;
+}
+
+.form-card {
+    transition: transform 0.3s ease;
 }

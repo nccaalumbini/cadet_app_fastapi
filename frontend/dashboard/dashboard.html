@@ -8,7 +8,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="icon" href="assets/image/logo.png" type="image/png">
-    <link rel="stylesheet" href="assets/public/school.css">
+    <link rel="stylesheet" href="../assets/public/school.css">
 
     <style>
         .loader {
@@ -1866,455 +1866,248 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="min-h-screen">
+                                <!-- Navigation will be here -->
 
-                            <!-- Schools Table -->
-                            <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-6 border border-gray-200">
-                                <div class="px-6 py-4 border-b flex justify-between items-center bg-gray-50">
-                                    <h3 class="text-lg font-semibold text-gray-800">Registered Schools</h3>
-                                    <div class="flex space-x-2">
-                                        <button
-                                            class="bg-white border text-gray-700 px-3 py-2 rounded-md text-sm hover:bg-gray-50 transition-colors flex items-center">
-                                            <i class="fas fa-filter mr-1 text-xs"></i> Filters
-                                        </button>
-                                        <button
-                                            class="bg-white border text-gray-700 px-3 py-2 rounded-md text-sm hover:bg-gray-50 transition-colors flex items-center">
-                                            <i class="fas fa-download mr-1 text-xs"></i> Export
-                                        </button>
+                                <main class="p-6">
+                                    <!-- Stats Section -->
+                                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                                        <!-- Stats cards will be populated by JavaScript -->
                                     </div>
-                                </div>
-                                <div class="overflow-x-auto">
-                                    <table class="min-w-full divide-y divide-gray-200">
-                                        <thead class="bg-gray-50">
-                                            <tr>
-                                                <th scope="col"
-                                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                    School Name
-                                                </th>
-                                                <th scope="col"
-                                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                    Location
-                                                </th>
-                                                <th scope="col"
-                                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                    Principal
-                                                </th>
-                                                <th scope="col"
-                                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                    Cadets
-                                                </th>
-                                                <th scope="col"
-                                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                    Status
-                                                </th>
-                                                <th scope="col"
-                                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                    Actions
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody class="bg-white divide-y divide-gray-200">
-                                            <tr class="table-row">
-                                                <td class="px-6 py-4 whitespace-nowrap">
-                                                    <div class="font-medium text-gray-900">Kathmandu Model College</div>
-                                                    <div class="text-sm text-gray-500">kathmandumodel.edu.np</div>
-                                                </td>
-                                                <td class="px-6 py-4 whitespace-nowrap">
-                                                    <div class="text-sm text-gray-900">Kathmandu</div>
-                                                    <div class="text-sm text-gray-500">Ward 7</div>
-                                                </td>
-                                                <td class="px-6 py-4 whitespace-nowrap">
-                                                    <div class="text-sm text-gray-900">Dr. Ramesh Sharma</div>
-                                                    <div class="text-sm text-gray-500">+977-9841123456</div>
-                                                </td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                    150
-                                                </td>
-                                                <td class="px-6 py-4 whitespace-nowrap">
-                                                    <span
-                                                        class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                                        Active
-                                                    </span>
-                                                </td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                    <button class="text-indigo-600 hover:text-indigo-900 mr-3"><i
-                                                            class="fas fa-edit"></i></button>
-                                                    <button class="text-indigo-600 hover:text-indigo-900 mr-3"><i
-                                                            class="fas fa-eye"></i></button>
-                                                    <button class="text-red-600 hover:text-red-900"><i
-                                                            class="fas fa-trash"></i></button>
-                                                </td>
-                                            </tr>
-                                            <tr class="table-row">
-                                                <td class="px-6 py-4 whitespace-nowrap">
-                                                    <div class="font-medium text-gray-900">Pokhara Secondary School
-                                                    </div>
-                                                    <div class="text-sm text-gray-500">pokharass.edu.np</div>
-                                                </td>
-                                                <td class="px-6 py-4 whitespace-nowrap">
-                                                    <div class="text-sm text-gray-900">Kaski</div>
-                                                    <div class="text-sm text-gray-500">Ward 3</div>
-                                                </td>
-                                                <td class="px-6 py-4 whitespace-nowrap">
-                                                    <div class="text-sm text-gray-900">Mr. Bikash Gurung</div>
-                                                    <div class="text-sm text-gray-500">+977-9856123456</div>
-                                                </td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                    98
-                                                </td>
-                                                <td class="px-6 py-4 whitespace-nowrap">
-                                                    <span
-                                                        class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                                        Active
-                                                    </span>
-                                                </td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                    <button class="text-indigo-600 hover:text-indigo-900 mr-3"><i
-                                                            class="fas fa-edit"></i></button>
-                                                    <button class="text-indigo-600 hover:text-indigo-900 mr-3"><i
-                                                            class="fas fa-eye"></i></button>
-                                                    <button class="text-red-600 hover:text-red-900"><i
-                                                            class="fas fa-trash"></i></button>
-                                                </td>
-                                            </tr>
-                                            <tr class="table-row">
-                                                <td class="px-6 py-4 whitespace-nowrap">
-                                                    <div class="font-medium text-gray-900">Birgunj Public School</div>
-                                                    <div class="text-sm text-gray-500">birgunjpublic.edu.np</div>
-                                                </td>
-                                                <td class="px-6 py-4 whitespace-nowrap">
-                                                    <div class="text-sm text-gray-900">Parsa</div>
-                                                    <div class="text-sm text-gray-500">Ward 5</div>
-                                                </td>
-                                                <td class="px-6 py-4 whitespace-nowrap">
-                                                    <div class="text-sm text-gray-900">Mrs. Sunita Yadav</div>
-                                                    <div class="text-sm text-gray-500">+977-9851123456</div>
-                                                </td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                    120
-                                                </td>
-                                                <td class="px-6 py-4 whitespace-nowrap">
-                                                    <span
-                                                        class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                                        Pending
-                                                    </span>
-                                                </td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                    <button class="text-indigo-600 hover:text-indigo-900 mr-3"><i
-                                                            class="fas fa-edit"></i></button>
-                                                    <button class="text-indigo-600 hover:text-indigo-900 mr-3"><i
-                                                            class="fas fa-eye"></i></button>
-                                                    <button class="text-red-600 hover:text-red-900"><i
-                                                            class="fas fa-trash"></i></button>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
+
+                                    <!-- Schools Table Section -->
+                                    <div class="bg-white rounded-lg shadow overflow-hidden">
+                                        <div
+                                            class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                                            <h2 class="text-lg font-medium text-gray-800">Schools</h2>
+                                            <div class="flex space-x-3">
+                                                <button id="exportSchoolsBtn"
+                                                    class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">
+                                                    <i class="fas fa-download mr-2"></i>Export
+                                                </button>
+                                                <button id="openSchoolFormBtn"
+                                                    class="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark">
+                                                    <i class="fas fa-plus mr-2"></i>Add School
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="overflow-x-auto">
+                                            <table class="min-w-full divide-y divide-gray-200">
+                                                <thead class="bg-gray-50">
+                                                    <tr>
+                                                        <th
+                                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                            School & Website</th>
+                                                        <th
+                                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                            Location</th>
+                                                        <th
+                                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                            Principal</th>
+                                                        <th
+                                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                            Cadets</th>
+                                                        <th
+                                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                            Status</th>
+                                                        <th
+                                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                            Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="schoolsTableBody" class="bg-white divide-y divide-gray-200">
+                                                    <!-- Schools will be populated by JavaScript -->
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between"
+                                            id="paginationContainer">
+                                            <!-- Pagination will be populated by JavaScript -->
+                                        </div>
+                                    </div>
+                                </main>
+                            </div>
+
+                            <!-- School Form Modal -->
+                            <div id="schoolFormModal"
+                                class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden form-container">
                                 <div
-                                    class="bg-white px-6 py-4 flex flex-col md:flex-row justify-between items-center border-t">
-                                    <div class="text-sm text-gray-700 mb-4 md:mb-0">
-                                        Showing <span class="font-medium">1</span> to <span class="font-medium">3</span>
-                                        of
-                                        <span class="font-medium">142</span> schools
+                                    class="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+                                    <div class="px-6 py-4 border-b border-gray-200">
+                                        <h3 id="formTitle" class="text-xl font-medium text-gray-800">Add New School</h3>
                                     </div>
-                                    <div class="flex items-center space-x-1">
-                                        <button class="px-3 py-1 rounded border text-sm text-gray-700 hover:bg-gray-50">
-                                            <i class="fas fa-chevron-left"></i>
-                                        </button>
-                                        <button
-                                            class="px-3 py-1 rounded border text-sm bg-primary text-white">1</button>
-                                        <button
-                                            class="px-3 py-1 rounded border text-sm text-gray-700 hover:bg-gray-50">2</button>
-                                        <button
-                                            class="px-3 py-1 rounded border text-sm text-gray-700 hover:bg-gray-50">3</button>
-                                        <button
-                                            class="px-3 py-1 rounded border text-sm text-gray-700 hover:bg-gray-50">4</button>
-                                        <button
-                                            class="px-3 py-1 rounded border text-sm text-gray-700 hover:bg-gray-50">5</button>
-                                        <button class="px-3 py-1 rounded border text-sm text-gray-700 hover:bg-gray-50">
-                                            <i class="fas fa-chevron-right"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </main>
-                    </div>
-
-                    <!-- School Form Modal (hidden by default) -->
-                    <!-- School Form Modal -->
-                    <div id="schoolFormModal" class="form-container hidden fixed inset-0 z-50 overflow-y-auto">
-                        <div
-                            class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-                            <!-- Backdrop -->
-                            <div class="fixed inset-0 transition-opacity" aria-hidden="true">
-                                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
-                            </div>
-
-                            <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
-
-                            <!-- Modal Card -->
-                            <div
-                                class="form-card inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
-                                <div class="form-header bg-primary text-white px-6 py-5">
-                                    <h2 class="text-2xl font-bold">Add New School</h2>
-                                    <p class="mt-1 opacity-90">Register a new NCC affiliated school</p>
-                                </div>
-
-                                <div class="form-body bg-white px-6 pt-5 pb-4">
-                                    <form id="schoolForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-
+                                    <form id="schoolForm" class="p-6">
                                         <!-- School Details -->
-                                        <div class="md:col-span-2">
-                                            <div
-                                                class="section-title flex items-center text-lg font-semibold text-gray-800 pb-2">
-                                                <i class="fas fa-school mr-2 text-primary"></i>
-                                                <h3>School Details</h3>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                            <div>
+                                                <label for="schoolName"
+                                                    class="form-label block text-sm font-medium text-gray-700 mb-1 required">School
+                                                    Name</label>
+                                                <input type="text" id="schoolName" name="schoolName"
+                                                    class="form-input w-full">
+                                                <div id="schoolNameError" class="error-message">School name is required
+                                                </div>
                                             </div>
-                                        </div>
-
-                                        <div>
-                                            <label for="schoolName"
-                                                class="form-label block text-sm font-medium text-gray-700 mb-1 required">School
-                                                Name</label>
-                                            <input type="text" id="schoolName" name="schoolName"
-                                                class="form-input w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
-                                                placeholder="Enter school name" required>
-                                        </div>
-
-                                        <div>
-                                            <label for="district"
-                                                class="form-label block text-sm font-medium text-gray-700 mb-1 required">District</label>
-                                            <select id="district" name="district"
-                                                class="form-input w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
-                                                required>
-                                                <option value="">Select District</option>
-                                                <option value="Kathmandu">Kathmandu</option>
-                                                <option value="Lalitpur">Lalitpur</option>
-                                                <option value="Bhaktapur">Bhaktapur</option>
-                                                <option value="Kaski">Kaski</option>
-                                                <option value="Palpa">Palpa</option>
-                                                <option value="Arghakhanchi">Arghakhanchi</option>
-                                                <option value="Dang">Dang</option>
-                                                <option value="Kapilvastu">Kapilvastu</option>
-                                                <option value="Nawalparasi">Nawalparasi</option>
-                                                <option value="Rupandehi">Rupandehi</option>
-                                                <option value="Pyuthan">Pyuthan</option>
-                                                <option value="Rolpa">Rolpa</option>
-                                                <option value="Gulmi">Gulmi</option>
-                                            </select>
-                                        </div>
-
-                                        <div>
-                                            <label for="municipality"
-                                                class="form-label block text-sm font-medium text-gray-700 mb-1 required">Municipality</label>
-                                            <input type="text" id="municipality" name="municipality"
-                                                class="form-input w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
-                                                placeholder="Enter municipality" required>
-                                        </div>
-
-                                        <div>
-                                            <label for="wardNumber"
-                                                class="form-label block text-sm font-medium text-gray-700 mb-1 required">Ward
-                                                Number</label>
-                                            <input type="number" id="wardNumber" name="wardNumber"
-                                                class="form-input w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
-                                                placeholder="Enter ward number" min="1" required>
-                                        </div>
-
-                                        <div>
-                                            <label for="areaName"
-                                                class="form-label block text-sm font-medium text-gray-700 mb-1">Area
-                                                Name</label>
-                                            <input type="text" id="areaName" name="areaName"
-                                                class="form-input w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
-                                                placeholder="Enter area name">
-                                        </div>
-
-                                        <div>
-                                            <label for="officialEmail"
-                                                class="form-label block text-sm font-medium text-gray-700 mb-1">Official
-                                                Email</label>
-                                            <input type="email" id="officialEmail" name="officialEmail"
-                                                class="form-input w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
-                                                placeholder="school@example.com">
-                                        </div>
-
-                                        <div>
-                                            <label for="phoneNumber"
-                                                class="form-label block text-sm font-medium text-gray-700 mb-1 required">Phone
-                                                Number</label>
-                                            <input type="tel" id="phoneNumber" name="phoneNumber"
-                                                class="form-input w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
-                                                placeholder="+977-1-XXXXXXX" required>
-                                        </div>
-
-                                        <div>
-                                            <label for="website"
-                                                class="form-label block text-sm font-medium text-gray-700 mb-1">Website</label>
-                                            <input type="url" id="website" name="website"
-                                                class="form-input w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
-                                                placeholder="https://example.com">
-                                        </div>
-
-                                        <!-- Principal & Contact Teacher -->
-                                        <div class="md:col-span-2 mt-6">
-                                            <div
-                                                class="section-title flex items-center text-lg font-semibold text-gray-800 pb-2">
-                                                <i class="fas fa-user-tie mr-2 text-primary"></i>
-                                                <h3>Principal & Contact Teacher</h3>
+                                            <div>
+                                                <label for="district"
+                                                    class="form-label block text-sm font-medium text-gray-700 mb-1 required">District</label>
+                                                <input type="text" id="district" name="district"
+                                                    class="form-input w-full">
+                                                <div id="districtError" class="error-message">District is required</div>
                                             </div>
-                                        </div>
-
-                                        <div>
-                                            <label for="principalName"
-                                                class="form-label block text-sm font-medium text-gray-700 mb-1 required">Principal
-                                                Name</label>
-                                            <input type="text" id="principalName" name="principalName"
-                                                class="form-input w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
-                                                placeholder="Full name of principal" required>
-                                        </div>
-
-                                        <div>
-                                            <label for="principalContact"
-                                                class="form-label block text-sm font-medium text-gray-700 mb-1 required">Principal
-                                                Contact
-                                                Number</label>
-                                            <input type="tel" id="principalContact" name="principalContact"
-                                                class="form-input w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
-                                                placeholder="+977-98XXXXXXXX" required>
-                                        </div>
-
-                                        <div>
-                                            <label for="teacherName"
-                                                class="form-label block text-sm font-medium text-gray-700 mb-1">Contact
-                                                Teacher Name</label>
-                                            <input type="text" id="teacherName" name="teacherName"
-                                                class="form-input w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
-                                                placeholder="Full name of contact teacher">
-                                        </div>
-
-                                        <div>
-                                            <label for="teacherContact"
-                                                class="form-label block text-sm font-medium text-gray-700 mb-1">Teacher
-                                                Contact
-                                                Number</label>
-                                            <input type="tel" id="teacherContact" name="teacherContact"
-                                                class="form-input w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
-                                                placeholder="+977-98XXXXXXXX">
-                                        </div>
-
-                                        <!-- NCC Information -->
-                                        <div class="md:col-span-2 mt-6">
-                                            <div
-                                                class="section-title flex items-center text-lg font-semibold text-gray-800 pb-2">
-                                                <i class="fas fa-users mr-2 text-primary"></i>
-                                                <h3>NCC Information</h3>
+                                            <div>
+                                                <label for="municipality"
+                                                    class="form-label block text-sm font-medium text-gray-700 mb-1 required">Municipality</label>
+                                                <input type="text" id="municipality" name="municipality"
+                                                    class="form-input w-full">
+                                                <div id="municipalityError" class="error-message">Municipality is
+                                                    required</div>
                                             </div>
-                                        </div>
-
-                                        <!-- Training Sessions Container -->
-                                        <div id="trainingSessionsContainer" class="space-y-4 md:col-span-2">
-                                            <div
-                                                class="session-row grid grid-cols-1 md:grid-cols-5 gap-4 bg-gray-50 p-4 rounded-lg">
-                                                <div>
-                                                    <label
-                                                        class="form-label block text-sm font-medium text-gray-700 mb-1 required">NCC
-                                                        Batch</label>
-                                                    <input type="text" name="nccBatch[]" class="form-input w-full"
-                                                        placeholder="Enter NCC batch" required>
+                                            <div>
+                                                <label for="wardNumber"
+                                                    class="form-label block text-sm font-medium text-gray-700 mb-1 required">Ward
+                                                    Number</label>
+                                                <input type="number" id="wardNumber" name="wardNumber"
+                                                    class="form-input w-full">
+                                                <div id="wardNumberError" class="error-message">Ward number is required
                                                 </div>
-                                                <div>
-                                                    <label
-                                                        class="form-label block text-sm font-medium text-gray-700 mb-1 required">Start
-                                                        Date</label>
-                                                    <input type="date" name="startDate[]" class="form-input w-full"
-                                                        required>
-                                                </div>
-                                                <div>
-                                                    <label
-                                                        class="form-label block text-sm font-medium text-gray-700 mb-1">Passout
-                                                        Date</label>
-                                                    <input type="date" name="passoutDate[]" class="form-input w-full">
-                                                </div>
-                                                <div>
-                                                    <label
-                                                        class="form-label block text-sm font-medium text-gray-700 mb-1 required">Division</label>
-                                                    <div class="flex space-x-4">
-                                                        <label class="flex items-center"><input type="radio"
-                                                                name="division-0" value="junior" class="mr-2"
-                                                                required>Junior</label>
-                                                        <label class="flex items-center"><input type="radio"
-                                                                name="division-0" value="senior"
-                                                                class="mr-2">Senior</label>
-                                                    </div>
-                                                </div>
-                                                <div class="flex items-end">
-                                                    <button type="button"
-                                                        class="removeSession bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600">Remove</button>
+                                            </div>
+                                            <div>
+                                                <label for="areaName"
+                                                    class="form-label block text-sm font-medium text-gray-700 mb-1">Area
+                                                    Name</label>
+                                                <input type="text" id="areaName" name="areaName"
+                                                    class="form-input w-full">
+                                            </div>
+                                            <div>
+                                                <label for="officialEmail"
+                                                    class="form-label block text-sm font-medium text-gray-700 mb-1">Official
+                                                    Email</label>
+                                                <input type="email" id="officialEmail" name="officialEmail"
+                                                    class="form-input w-full">
+                                                <div id="officialEmailError" class="error-message">Please enter a valid
+                                                    email address</div>
+                                            </div>
+                                            <div>
+                                                <label for="phoneNumber"
+                                                    class="form-label block text-sm font-medium text-gray-700 mb-1 required">Phone
+                                                    Number</label>
+                                                <input type="tel" id="phoneNumber" name="phoneNumber"
+                                                    class="form-input w-full">
+                                                <div id="phoneNumberError" class="error-message">Phone number is
+                                                    required</div>
+                                            </div>
+                                            <div>
+                                                <label for="website"
+                                                    class="form-label block text-sm font-medium text-gray-700 mb-1">Website</label>
+                                                <input type="url" id="website" name="website" class="form-input w-full"
+                                                    placeholder="https://example.com">
+                                                <div id="websiteError" class="error-message">Please enter a valid URL
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <!-- Informational Note -->
-                                        <div class="md:col-span-2 bg-blue-50 p-4 rounded-lg">
-                                            <p class="text-sm text-blue-700 flex items-start">
-                                                <i class="fas fa-info-circle mr-2 mt-0.5"></i>
-                                                A school can have multiple training sessions in different years. You can
-                                                add additional sessions after saving this record.
-                                            </p>
+                                        <!-- Principal and Teacher Details -->
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                            <div>
+                                                <label for="principalName"
+                                                    class="form-label block text-sm font-medium text-gray-700 mb-1 required">Principal
+                                                    Name</label>
+                                                <input type="text" id="principalName" name="principalName"
+                                                    class="form-input w-full">
+                                                <div id="principalNameError" class="error-message">Principal name is
+                                                    required</div>
+                                            </div>
+                                            <div>
+                                                <label for="principalContact"
+                                                    class="form-label block text-sm font-medium text-gray-700 mb-1 required">Principal
+                                                    Contact</label>
+                                                <input type="text" id="principalContact" name="principalContact"
+                                                    class="form-input w-full">
+                                                <div id="principalContactError" class="error-message">Principal contact
+                                                    is required</div>
+                                            </div>
+                                            <div>
+                                                <label for="teacherName"
+                                                    class="form-label block text-sm font-medium text-gray-700 mb-1">Teacher
+                                                    Name</label>
+                                                <input type="text" id="teacherName" name="teacherName"
+                                                    class="form-input w-full">
+                                            </div>
+                                            <div>
+                                                <label for="teacherContact"
+                                                    class="form-label block text-sm font-medium text-gray-700 mb-1">Teacher
+                                                    Contact</label>
+                                                <input type="text" id="teacherContact" name="teacherContact"
+                                                    class="form-input w-full">
+                                            </div>
                                         </div>
 
-                                        <!-- Add Session Button -->
-                                        <div class="md:col-span-2 mt-2">
-                                            <button type="button" id="addSessionBtn"
-                                                class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
-                                                + Add Training Session
-                                            </button>
-                                        </div>
-                                        <!-- Additional Notes -->
-                                        <div class="md:col-span-2 mt-6">
-                                            <div
-                                                class="section-title flex items-center text-lg font-semibold text-gray-800 pb-2">
-                                                <i class="fas fa-sticky-note mr-2 text-primary"></i>
-                                                <h3>Additional Notes</h3>
+                                        <!-- Training Sessions -->
+                                        <div class="mb-6">
+                                            <div class="flex justify-between items-center mb-4">
+                                                <h4 class="text-lg font-medium text-gray-800">Training Sessions</h4>
+                                                <button type="button" id="addSessionBtn"
+                                                    class="px-3 py-1 bg-primary text-white rounded-md text-sm hover:bg-primary-dark">
+                                                    <i class="fas fa-plus mr-1"></i> Add Session
+                                                </button>
                                             </div>
-                                            <textarea id="notes" name="notes"
-                                                class="form-input w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
-                                                rows="4" placeholder="Enter any additional information"></textarea>
+                                            <div id="trainingSessionsContainer">
+                                                <!-- Sessions will be added dynamically -->
+                                            </div>
+                                            <div id="divisionError" class="error-message mt-2">Please select a division
+                                                for each session</div>
+                                        </div>
+
+                                        <!-- Notes -->
+                                        <div class="mb-6">
+                                            <label for="notes"
+                                                class="form-label block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                                            <textarea id="notes" name="notes" rows="3"
+                                                class="form-input w-full"></textarea>
                                         </div>
 
                                         <!-- Form Actions -->
-                                        <div class="md:col-span-2 flex justify-end space-x-4 mt-8 pt-4 border-t">
+                                        <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200">
                                             <button type="button" id="cancelSchoolFormBtn"
-                                                class="btn-outline px-4 py-2 border rounded-md text-gray-700 hover:bg-gray-50">Cancel</button>
+                                                class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">Cancel</button>
                                             <button type="submit"
-                                                class="btn-primary-form bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark">Save
+                                                class="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark">Save
                                                 School</button>
                                         </div>
-
                                     </form>
                                 </div>
                             </div>
-                        </div>
+
+                            <!-- View School Modal -->
+                            <div id="viewSchoolModal"
+                                class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
+                                <!-- View modal content -->
+                            </div>
+
+                            <!-- Confirmation Modal -->
+                            <div id="confirmationModal"
+                                class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
+                                <!-- Confirmation modal content -->
+                            </div>
+
                     </div>
 
 
-                </div>
 
 
 
+                    <!-- Loader -->
+                    <div id="loader"
+                        class="fixed inset-0 bg-olive-900 bg-opacity-40 flex items-center justify-center hidden z-50">
+                        <div class="loader ease-linear rounded-full border-4 border-t-4 border-olive-400 h-16 w-16">
+                        </div>
+                    </div>
 
+                    <div id="sidebarOverlay" onclick="closeSidebar()"></div>
 
-                <!-- Loader -->
-                <div id="loader"
-                    class="fixed inset-0 bg-olive-900 bg-opacity-40 flex items-center justify-center hidden z-50">
-                    <div class="loader ease-linear rounded-full border-4 border-t-4 border-olive-400 h-16 w-16"></div>
-                </div>
-
-                <div id="sidebarOverlay" onclick="closeSidebar()"></div>
-
-                <script src="../assets/js/main.js"></script>
-                <script src="../assets/js/school.js"></script>
+                    <script src="../assets/js/main.js"></script>
+                    <script src="../assets/js/school.js"></script>
 
 
 </body>
