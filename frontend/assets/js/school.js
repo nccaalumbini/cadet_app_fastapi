@@ -44,7 +44,10 @@ function setupEventListeners() {
     // Form submit handler
     const schoolForm = document.getElementById('schoolForm');
     if (schoolForm) {
+        console.log("Attaching form submit handler 🚀");
         schoolForm.addEventListener('submit', handleFormSubmit);
+    } else {
+        console.error("School form not found in the DOM");
     }
 
     // Add training session
@@ -52,104 +55,47 @@ function setupEventListeners() {
     if (addSessionBtn) {
         addSessionBtn.addEventListener('click', () => addTrainingSession());
     }
-
-    // Event delegation for dynamically created elements
-    document.addEventListener('click', function (e) {
-        // Edit school buttons
-        if (e.target.classList.contains('edit-btn') || e.target.closest('.edit-btn')) {
-            const btn = e.target.classList.contains('edit-btn') ? e.target : e.target.closest('.edit-btn');
-            const schoolId = btn.dataset.id;
-            openSchoolForm(true, schoolId);
-        }
-
-        // View school buttons
-        if (e.target.classList.contains('view-btn') || e.target.closest('.view-btn')) {
-            const btn = e.target.classList.contains('view-btn') ? e.target : e.target.closest('.view-btn');
-            const schoolId = btn.dataset.id;
-            viewSchool(schoolId);
-        }
-
-        // Delete school buttons
-        if (e.target.classList.contains('delete-btn') || e.target.closest('.delete-btn')) {
-            const btn = e.target.classList.contains('delete-btn') ? e.target : e.target.closest('.delete-btn');
-            const schoolId = btn.dataset.id;
-            confirmDelete(schoolId);
-        }
-
-        // Remove session buttons
-        if (e.target.classList.contains('removeSessionBtn') || e.target.closest('.removeSessionBtn')) {
-            const btn = e.target.classList.contains('removeSessionBtn') ? e.target : e.target.closest('.removeSessionBtn');
-            const row = btn.closest('.session-row');
-            if (document.querySelectorAll('.session-row').length > 1) {
-                row.remove();
-            } else {
-                showNotification('At least one training session is required', 'error');
-            }
-        }
-    });
-
-    // Close modals when clicking outside
-    const modals = document.querySelectorAll('.form-container');
-    modals.forEach(modal => {
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                if (modal.id === 'schoolFormModal') {
-                    closeSchoolForm();
-                } else if (modal.id === 'confirmationModal') {
-                    closeConfirmationModal();
-                }
-            }
-        });
-    });
 }
 
-// Basic API request function
-async function apiRequest(endpoint, options = {}) {
-    const url = `${API_BASE_URL}${endpoint}`;
-    console.log("API Call →", url, options);
-
-    // Default options
-    const defaultOptions = {
-        method: 'GET',
+// Event delegation for dynamically created elements
+document.addEventListener('click', function (e) {
+    // Edit school buttons
+    if (e.target.classList.contains('edit-btn') || e.target.closest('.edit-btn')) {
+        const btn = e.target.classList.contains('edit-btn') ? e.target : e.target.closest('.edit-btn');
+        const schoolId = btn.dataset.id;
+        openSchoolForm(true, schoolId);
+    }
+    // ...existing code for view and delete buttons...
+});
+// API request helper
+async function apiRequest(url, options = {}) {
+    const response = await fetch(`${API_BASE_URL}${url}`, {
         headers: {
             'Content-Type': 'application/json',
-        },
-    };
-
-    // Merge options
-    options = {
-        ...defaultOptions,
-        ...options,
-        headers: {
-            ...defaultOptions.headers,
             ...options.headers,
         },
-    };
+        ...options,
+        body: options.body ? JSON.stringify(options.body) : undefined,
+    });
 
-    // If there's a body object, stringify it
-    if (options.body && typeof options.body !== 'string') {
-        options.body = JSON.stringify(options.body);
+    if (!response.ok) {
+        const error = await response.text();
+        throw new Error(error || 'Request failed');
     }
 
+    return response.json();
+}
+
+// School API functions
+async function getSchools(page = 1, limit = 10) {
     try {
-        const response = await fetch(url, options);
+        const response = await apiRequest(`/api/schools?page=${page - 1}&size=${limit}&sortBy=name&direction=asc`);
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('API Error:', response.status, errorText);
-            throw new Error(`API error ${response.status}: ${response.statusText}`);
-        }
-
-        // If the response has content, parse JSON
-        const contentType = response.headers.get('content-type');
-        if (contentType && contentType.includes('application/json')) {
-            return await response.json();
-        } else {
-            return null;
-        }
+        return response.content;
     } catch (error) {
-        console.error('API request failed:', error);
-        throw error;
+        console.error('Failed to fetch schools:', error);
+        showNotification('Failed to load schools', 'error');
+        return [];
     }
 }
 
@@ -178,12 +124,14 @@ async function getSchoolById(id) {
 
 async function createSchool(schoolData) {
     try {
+        console.log("Creating school with data:", schoolData);
         return await apiRequest('/api/schools', {
             method: 'POST',
             body: schoolData
         });
     } catch (error) {
         console.error('Failed to create school:', error);
+        showNotification(error.message || 'Failed to create school', 'error');
         throw error;
     }
 }
@@ -291,27 +239,27 @@ async function loadSchoolData(schoolId) {
             document.getElementById('schoolName').value = school.name || '';
             document.getElementById('district').value = school.district || '';
             document.getElementById('municipality').value = school.municipality || '';
-            document.getElementById('wardNumber').value = school.ward_number || '';
-            document.getElementById('areaName').value = school.area_name || '';
-            document.getElementById('officialEmail').value = school.official_email || '';
-            document.getElementById('phoneNumber').value = school.phone_number || '';
+            document.getElementById('wardNumber').value = school.wardNumber || '';
+            document.getElementById('areaName').value = school.areaName || '';
+            document.getElementById('officialEmail').value = school.officialEmail || '';
+            document.getElementById('phoneNumber').value = school.phoneNumber || '';
             document.getElementById('website').value = school.website || '';
-            document.getElementById('principalName').value = school.principal_name || '';
-            document.getElementById('principalContact').value = school.principal_contact || '';
-            document.getElementById('teacherName').value = school.teacher_name || '';
-            document.getElementById('teacherContact').value = school.teacher_contact || '';
+            document.getElementById('principalName').value = school.principalName || '';
+            document.getElementById('principalContact').value = school.principalContact || '';
+            document.getElementById('teacherName').value = school.teacherName || '';
+            document.getElementById('teacherContact').value = school.teacherContact || '';
             document.getElementById('notes').value = school.notes || '';
 
             // Populate training sessions
             const sessionsContainer = document.getElementById('trainingSessionsContainer');
             sessionsContainer.innerHTML = '';
 
-            if (school.training_sessions && school.training_sessions.length > 0) {
-                school.training_sessions.forEach((session, index) => {
+            if (school.trainingSessions && school.trainingSessions.length > 0) {
+                school.trainingSessions.forEach((session, index) => {
                     addTrainingSession(
-                        session.ncc_batch,
-                        session.start_date,
-                        session.passout_date,
+                        session.nccBatch,
+                        session.startDate,
+                        session.passoutDate,
                         session.division,
                         index
                     );
@@ -325,7 +273,6 @@ async function loadSchoolData(schoolId) {
         showNotification('Failed to load school data', 'error');
     }
 }
-
 async function handleFormSubmit(e) {
     e.preventDefault();
     console.log("Form submit triggered 🚀");
@@ -333,6 +280,7 @@ async function handleFormSubmit(e) {
     if (validateForm()) {
         const formData = gatherFormData();
         console.log("Submitting school data:", formData);
+        console.log("About to call createSchool API...");
 
         try {
             if (isEditMode && currentSchoolId) {
@@ -350,6 +298,8 @@ async function handleFormSubmit(e) {
             console.error('Failed to save school:', error);
             showNotification('Failed to save school. Please try again.', 'error');
         }
+    } else {
+        console.log("Form validation failed. Not submitting.");
     }
 }
 
@@ -358,17 +308,18 @@ function gatherFormData() {
         name: document.getElementById('schoolName').value,
         district: document.getElementById('district').value,
         municipality: document.getElementById('municipality').value,
-        ward_number: parseInt(document.getElementById('wardNumber').value) || 0,
-        area_name: document.getElementById('areaName').value || null,
-        official_email: document.getElementById('officialEmail').value || null,
-        phone_number: document.getElementById('phoneNumber').value,
+        wardNumber: parseInt(document.getElementById('wardNumber').value) || 0,
+        areaName: document.getElementById('areaName').value || null,
+        officialEmail: document.getElementById('officialEmail').value || null,
+        phoneNumber: document.getElementById('phoneNumber').value,
         website: document.getElementById('website').value || null,
-        principal_name: document.getElementById('principalName').value,
-        principal_contact: document.getElementById('principalContact').value,
-        teacher_name: document.getElementById('teacherName').value || null,
-        teacher_contact: document.getElementById('teacherContact').value || null,
+        principalName: document.getElementById('principalName').value,
+        principalContact: document.getElementById('principalContact').value,
+        teacherName: document.getElementById('teacherName').value || null,
+        teacherContact: document.getElementById('teacherContact').value || null,
         notes: document.getElementById('notes').value || null,
-        training_sessions: []
+        isActive: true,
+        trainingSessions: []
     };
 
     // Gather training sessions
@@ -380,10 +331,10 @@ function gatherFormData() {
         const divisionRadio = row.querySelector(`input[name="division-${index}"]:checked`);
 
         if (nccBatch && startDate && divisionRadio) {
-            formData.training_sessions.push({
-                ncc_batch: nccBatch,
-                start_date: startDate,
-                passout_date: passoutDate || null,
+            formData.trainingSessions.push({
+                nccBatch: nccBatch,
+                startDate: startDate,
+                passoutDate: passoutDate || null,
                 division: divisionRadio.value
             });
         }
@@ -394,6 +345,7 @@ function gatherFormData() {
 
 function validateForm() {
     let isValid = true;
+    let failedFields = [];
 
     // Required fields validation
     const requiredFields = [
@@ -404,17 +356,30 @@ function validateForm() {
     requiredFields.forEach(field => {
         const element = document.getElementById(field);
         const errorElement = document.getElementById(`${field}Error`);
+        let invalid = false;
 
-        if (element && !element.value.trim()) {
-            if (errorElement) errorElement.classList.remove('hidden');
-            element.classList.add('border-red-500');
+        if (!element) {
+            console.warn(`⚠️ Element with id="${field}" not found`);
+            return;
+        }
+
+        if (field === "district") {
+            console.log("District raw value:", element.value);
+            invalid = !element.value || element.value.trim() === "";
+        } else {
+            invalid = !element.value || element.value.trim() === "";
+        }
+
+        if (invalid) {
+            if (errorElement) errorElement.classList.remove("hidden");
+            element.classList.add("border-red-500");
             isValid = false;
-        } else if (element && errorElement) {
-            errorElement.classList.add('hidden');
-            element.classList.remove('border-red-500');
+            failedFields.push(field);
+        } else {
+            if (errorElement) errorElement.classList.add("hidden");
+            element.classList.remove("border-red-500");
         }
     });
-
     // Validate training sessions
     const sessionRows = document.querySelectorAll('.session-row');
     sessionRows.forEach((row, index) => {
@@ -430,26 +395,29 @@ function validateForm() {
         if (!nccBatch.value.trim()) {
             nccBatch.classList.add('border-red-500');
             isValid = false;
+            failedFields.push(`Training session ${index + 1} NCC Batch`);
         }
 
         if (!startDate.value) {
             startDate.classList.add('border-red-500');
             isValid = false;
+            failedFields.push(`Training session ${index + 1} Start Date`);
         }
 
         if (!divisionSelected) {
             isValid = false;
+            failedFields.push(`Training session ${index + 1} Division`);
         }
     });
 
     // Email validation
     const email = document.getElementById('officialEmail');
     const emailError = document.getElementById('officialEmailError');
-
     if (email && email.value && !isValidEmail(email.value)) {
         if (emailError) emailError.classList.remove('hidden');
         email.classList.add('border-red-500');
         isValid = false;
+        failedFields.push('Invalid email address');
     } else if (email && emailError) {
         emailError.classList.add('hidden');
         email.classList.remove('border-red-500');
@@ -458,18 +426,28 @@ function validateForm() {
     // Website validation
     const website = document.getElementById('website');
     const websiteError = document.getElementById('websiteError');
-
     if (website && website.value && !isValidUrl(website.value)) {
         if (websiteError) websiteError.classList.remove('hidden');
         website.classList.add('border-red-500');
         isValid = false;
+        failedFields.push('Invalid website URL');
     } else if (website && websiteError) {
         websiteError.classList.add('hidden');
         website.classList.remove('border-red-500');
     }
 
+    if (!isValid) {
+        console.log('Form validation failed for fields:', failedFields);
+    }
+    console.log("❌ Failed fields:", failedFields);
     return isValid;
+
+
+
+
 }
+
+
 
 function isValidEmail(email) {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -493,20 +471,20 @@ function addTrainingSession(nccBatch = '', startDate = '', passoutDate = '', div
     sessionRow.innerHTML = `
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
                     <div>
-                        <label class="form-label required">NCC Batch</label>
-                        <input type="text" name="nccBatch[]" class="form-input" placeholder="Enter NCC batch" value="${nccBatch}" required>
+                        <label class="block text-sm font-medium text-gray-700 mb-1 required">NCC Batch</label>
+                        <input type="text" name="nccBatch[]" class="w-full px-3 py-2 border rounded-md" placeholder="Enter NCC batch" value="${nccBatch}" required>
                     </div>
                     <div>
-                        <label class="form-label required">Start Date</label>
-                        <input type="date" name="startDate[]" class="form-input" value="${startDate}" required>
+                        <label class="block text-sm font-medium text-gray-700 mb-1 required">Start Date</label>
+                        <input type="date" name="startDate[]" class="w-full px-3 py-2 border rounded-md" value="${startDate}" required>
                     </div>
                     <div>
-                        <label class="form-label">Passout Date</label>
-                        <input type="date" name="passoutDate[]" class="form-input" value="${passoutDate}">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Passout Date</label>
+                        <input type="date" name="passoutDate[]" class="w-full px-3 py-2 border rounded-md" value="${passoutDate}">
                     </div>
                     <div class="flex items-center space-x-4">
                         <div>
-                            <label class="form-label required">Division</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1 required">Division</label>
                             <div class="flex space-x-4 mt-1">
                                 <label class="flex items-center">
                                     <input type="radio" name="division-${sessionId}" value="junior" class="mr-2" ${division === 'junior' ? 'checked' : ''}>
@@ -555,7 +533,7 @@ function renderSchools(schools) {
 
     schools.forEach(school => {
         const row = document.createElement('tr');
-        row.className = 'table-row';
+        row.className = 'hover:bg-gray-50';
         row.innerHTML = `
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="font-medium text-gray-900">${school.name}</div>
@@ -563,18 +541,18 @@ function renderSchools(schools) {
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="text-sm text-gray-900">${school.district}</div>
-                        <div class="text-sm text-gray-500">Ward ${school.ward_number}</div>
+                        <div class="text-sm text-gray-500">Ward ${school.wardNumber}</div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm text-gray-900">${school.principal_name}</div>
-                        <div class="text-sm text-gray-500">${school.principal_contact}</div>
+                        <div class="text-sm text-gray-900">${school.principalName}</div>
+                        <div class="text-sm text-gray-500">${school.principalContact}</div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        ${calculateTotalCadets(school.training_sessions)}
+                        ${calculateTotalCadets(school.trainingSessions)}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${school.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
-                            ${school.is_active ? 'Active' : 'Inactive'}
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${school.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                            ${school.isActive ? 'Active' : 'Inactive'}
                         </span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -598,7 +576,7 @@ function renderSchools(schools) {
 
 function calculateTotalCadets(trainingSessions) {
     if (!trainingSessions || trainingSessions.length === 0) return 0;
-    return trainingSessions.length * 30; // Assuming 30 cadets per session
+    return trainingSessions.length * 36; // 36 cadets per session as per backend
 }
 
 function updatePagination() {
@@ -632,14 +610,8 @@ function updatePagination() {
     for (let i = 1; i <= totalPages; i++) {
         if (i === currentPage) {
             paginationHTML += `<button class="px-3 py-1 rounded border text-sm bg-indigo-600 text-white">${i}</button>`;
-        } else if (
-            i === 1 ||
-            i === totalPages ||
-            (i >= currentPage - 1 && i <= currentPage + 1)
-        ) {
+        } else {
             paginationHTML += `<button class="px-3 py-1 rounded border text-sm text-gray-700 hover:bg-gray-50" onclick="changePage(${i})">${i}</button>`;
-        } else if (i === currentPage - 2 || i === currentPage + 2) {
-            paginationHTML += `<span class="px-2 py-1">...</span>`;
         }
     }
 
@@ -674,7 +646,7 @@ function renderStats(stats) {
     if (!statsContainer) return;
 
     statsContainer.innerHTML = `
-                <div class="stats-card bg-white p-6 rounded-lg shadow-sm border-l-4 border-indigo-500">
+                <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-indigo-500">
                     <div class="flex justify-between items-start">
                         <div>
                             <p class="text-gray-500 text-sm font-medium">Total Schools</p>
@@ -687,7 +659,7 @@ function renderStats(stats) {
                     </div>
                 </div>
 
-                <div class="stats-card bg-white p-6 rounded-lg shadow-sm border-l-4 border-green-500">
+                <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-green-500">
                     <div class="flex justify-between items-start">
                         <div>
                             <p class="text-gray-500 text-sm font-medium">Active Schools</p>
@@ -700,7 +672,7 @@ function renderStats(stats) {
                     </div>
                 </div>
 
-                <div class="stats-card bg-white p-6 rounded-lg shadow-sm border-l-4 border-amber-500">
+                <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-amber-500">
                     <div class="flex justify-between items-start">
                         <div>
                             <p class="text-gray-500 text-sm font-medium">Total Cadets</p>
@@ -713,7 +685,7 @@ function renderStats(stats) {
                     </div>
                 </div>
 
-                <div class="stats-card bg-white p-6 rounded-lg shadow-sm border-l-4 border-blue-500">
+                <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-blue-500">
                     <div class="flex justify-between items-start">
                         <div>
                             <p class="text-gray-500 text-sm font-medium">Districts Covered</p>
@@ -726,52 +698,6 @@ function renderStats(stats) {
                     </div>
                 </div>
             `;
-}
-
-function viewSchool(schoolId) {
-    showNotification('View school functionality will be implemented soon', 'info');
-}
-
-function confirmDelete(schoolId) {
-    currentSchoolId = schoolId;
-
-    const confirmationModal = document.getElementById('confirmationModal');
-    const confirmationTitle = document.getElementById('confirmationTitle');
-    const confirmationMessage = document.getElementById('confirmationMessage');
-
-    if (confirmationModal && confirmationTitle && confirmationMessage) {
-        confirmationTitle.textContent = 'Delete School';
-        confirmationMessage.textContent = 'Are you sure you want to delete this school? This action cannot be undone.';
-        confirmationModal.classList.remove('hidden');
-    }
-}
-
-function closeConfirmationModal() {
-    const confirmationModal = document.getElementById('confirmationModal');
-    if (confirmationModal) {
-        confirmationModal.classList.add('hidden');
-    }
-    currentSchoolId = null;
-}
-
-async function executeConfirmedAction() {
-    if (currentSchoolId) {
-        try {
-            await deleteSchool(currentSchoolId);
-            showNotification('School deleted successfully', 'success');
-            loadSchools();
-            loadStats();
-        } catch (error) {
-            console.error('Failed to delete school:', error);
-            showNotification('Failed to delete school', 'error');
-        }
-    }
-
-    closeConfirmationModal();
-}
-
-function exportSchools() {
-    showNotification('Export functionality will be implemented soon', 'info');
 }
 
 function showNotification(message, type = 'info') {
