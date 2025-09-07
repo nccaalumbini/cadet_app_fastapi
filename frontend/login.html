@@ -49,11 +49,13 @@
 
     passwordToggle.addEventListener('click', () => {
       passwordInput.type = passwordInput.type === 'password' ? 'text' : 'password';
-      passwordToggle.innerHTML = passwordInput.type === 'password' ? '<i class="fa fa-eye"></i>' : '<i class="fa fa-eye-slash"></i>';
+      passwordToggle.innerHTML = passwordInput.type === 'password'
+        ? '<i class="fa fa-eye"></i>'
+        : '<i class="fa fa-eye-slash"></i>';
     });
 
-    //API Login - No changes needed to the request
-    const API_BASE = "http://localhost:8080"; // Spring default port
+    // Simple login without session/auth
+    const API_BASE = "http://localhost:8080";
     const loginForm = document.getElementById('login-form');
 
     loginForm.addEventListener('submit', async (e) => {
@@ -62,30 +64,29 @@
       const identifier = document.getElementById('li_username').value.trim();
       const password = document.getElementById('li_password').value;
 
+      // Clear previous error
+      document.getElementById('li_msg').textContent = '';
+
+      // Decide whether it's username or email
+      const username = identifier.includes('@') ? null : identifier;
+      const email = identifier.includes('@') ? identifier : null;
+
       try {
+        // Call backend API to check credentials
         const res = await fetch(API_BASE + "/auth/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          credentials: 'include', // Important for sessions
-          body: JSON.stringify({
-            username: identifier.includes('@') ? null : identifier,
-            email: identifier.includes('@') ? identifier : null,
-            password
-          })
+          body: JSON.stringify({ username, email, password })
         });
 
-        const data = await res.json();
         if (!res.ok) {
           const errorData = await res.json();
-          throw new Error(errorData.error || "Login failed");
+          throw new Error(errorData.error || "Invalid username/email or password");
         }
 
-        // Save user info (but not token since we're using sessions)
-        localStorage.setItem("user_role", data.role);
-        localStorage.setItem("user_district", data.district);
-        localStorage.setItem("username", data.username);
+        const data = await res.json();
 
-        // Redirect always to same dashboard
+        // Redirect to dashboard without session/cookies
         window.location.href = "../dashboard/dashboard.html";
       } catch (err) {
         document.getElementById('li_msg').textContent = err.message;

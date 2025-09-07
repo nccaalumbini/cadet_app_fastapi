@@ -232,6 +232,15 @@
         .report-section.active {
             display: block;
         }
+
+        .session-expired {
+            background-color: #fffbeb;
+            border-left: 4px solid #f59e0b;
+            color: #92400e;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 0.375rem;
+        }
     </style>
 </head>
 
@@ -1928,157 +1937,208 @@
                                 </main>
                             </div>
 
-                            <!-- School Form Modal -->
-                            <div id="schoolFormModal"
-                                class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden form-container">
-                                <div
-                                    class="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-                                    <div class="px-6 py-4 border-b border-gray-200">
-                                        <h3 id="formTitle" class="text-xl font-medium text-gray-800">Add New School</h3>
+                            <!-- School Form Modal (hidden by default) -->
+                            <div id="schoolFormModal" class="form-container hidden">
+                                <div class="form-card">
+                                    <div class="form-header flex justify-between items-center">
+                                        <div>
+                                            <h2 class="text-2xl font-bold">Add New School</h2>
+                                            <p class="mt-2">Register a new NCC affiliated school</p>
+                                        </div>
+                                        <button type="button" class="close-btn" id="closeSchoolFormBtn">✖</button>
                                     </div>
-                                    <form id="schoolForm" class="p-6">
-                                        <!-- School Details -->
-                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                                            <div>
-                                                <label for="schoolName"
-                                                    class="form-label block text-sm font-medium text-gray-700 mb-1 required">School
-                                                    Name</label>
-                                                <input type="text" id="schoolName" name="schoolName"
-                                                    class="form-input w-full">
-                                                <div id="schoolNameError" class="error-message">School name is required
+
+                                    <div class="form-body">
+                                        <form id="schoolForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <!-- School Details Section -->
+                                            <div class="md:col-span-2">
+                                                <div class="section-title">
+                                                    <i class="fas fa-school mr-2"></i>
+                                                    <h3>School Details</h3>
                                                 </div>
                                             </div>
+
                                             <div>
-                                                <label for="district"
-                                                    class="form-label block text-sm font-medium text-gray-700 mb-1 required">District</label>
-                                                <input type="text" id="district" name="district"
-                                                    class="form-input w-full">
-                                                <div id="districtError" class="error-message">District is required</div>
+                                                <label for="schoolName" class="form-label required">School Name</label>
+                                                <input type="text" id="schoolName" name="schoolName" class="form-input"
+                                                    placeholder="Enter school name" required>
+                                                <div id="schoolNameError" class="error-message">Please enter a school
+                                                    name</div>
                                             </div>
+
+                                            <div>
+                                                <label for="district" class="form-label required">District</label>
+                                                <select id="district" name="district" class="form-input" required>
+                                                    <option value="">Select District</option>
+                                                    <option value="Kathmandu">Kathmandu</option>
+                                                    <option value="Lalitpur">Lalitpur</option>
+                                                    <option value="Bhaktapur">Bhaktapur</option>
+                                                    <option value="Kaski">Kaski</option>
+                                                    <option value="Palpa">Palpa</option>
+                                                    <option value="Arghakhanchi">Arghakhanchi</option>
+                                                    <option value="Dang">Dang</option>
+                                                    <option value="Kapilvastu">Kapilvastu</option>
+                                                    <option value="Nawalparasi">Nawalparasi</option>
+                                                    <option value="Rupandehi">Rupandehi</option>
+                                                    <option value="Pyuthan">Pyuthan</option>
+                                                    <option value="Rolpa">Rolpa</option>
+                                                    <option value="Gulmi">Gulmi</option>
+                                                </select>
+                                                <div id="districtError" class="error-message">Please select a district
+                                                </div>
+                                            </div>
+
                                             <div>
                                                 <label for="municipality"
-                                                    class="form-label block text-sm font-medium text-gray-700 mb-1 required">Municipality</label>
+                                                    class="form-label required">Municipality</label>
                                                 <input type="text" id="municipality" name="municipality"
-                                                    class="form-input w-full">
-                                                <div id="municipalityError" class="error-message">Municipality is
-                                                    required</div>
+                                                    class="form-input" placeholder="Enter municipality" required>
+                                                <div id="municipalityError" class="error-message">Please enter a
+                                                    municipality</div>
                                             </div>
+
                                             <div>
-                                                <label for="wardNumber"
-                                                    class="form-label block text-sm font-medium text-gray-700 mb-1 required">Ward
-                                                    Number</label>
+                                                <label for="wardNumber" class="form-label required">Ward Number</label>
                                                 <input type="number" id="wardNumber" name="wardNumber"
-                                                    class="form-input w-full">
-                                                <div id="wardNumberError" class="error-message">Ward number is required
-                                                </div>
+                                                    class="form-input" placeholder="Enter ward number" min="1" required>
+                                                <div id="wardNumberError" class="error-message">Please enter a valid
+                                                    ward number</div>
                                             </div>
+
                                             <div>
-                                                <label for="areaName"
-                                                    class="form-label block text-sm font-medium text-gray-700 mb-1">Area
-                                                    Name</label>
-                                                <input type="text" id="areaName" name="areaName"
-                                                    class="form-input w-full">
+                                                <label for="areaName" class="form-label">Area Name</label>
+                                                <input type="text" id="areaName" name="areaName" class="form-input"
+                                                    placeholder="Enter area name">
                                             </div>
+
                                             <div>
-                                                <label for="officialEmail"
-                                                    class="form-label block text-sm font-medium text-gray-700 mb-1">Official
-                                                    Email</label>
+                                                <label for="officialEmail" class="form-label">Official Email</label>
                                                 <input type="email" id="officialEmail" name="officialEmail"
-                                                    class="form-input w-full">
+                                                    class="form-input" placeholder="school@example.com">
                                                 <div id="officialEmailError" class="error-message">Please enter a valid
                                                     email address</div>
                                             </div>
+
                                             <div>
-                                                <label for="phoneNumber"
-                                                    class="form-label block text-sm font-medium text-gray-700 mb-1 required">Phone
+                                                <label for="phoneNumber" class="form-label required">Phone
                                                     Number</label>
-                                                <input type="tel" id="phoneNumber" name="phoneNumber"
-                                                    class="form-input w-full">
-                                                <div id="phoneNumberError" class="error-message">Phone number is
-                                                    required</div>
+                                                <input type="tel" id="phoneNumber" name="phoneNumber" class="form-input"
+                                                    placeholder="+977-1-XXXXXXX" required>
+                                                <div id="phoneNumberError" class="error-message">Please enter a valid
+                                                    phone number</div>
                                             </div>
+
                                             <div>
-                                                <label for="website"
-                                                    class="form-label block text-sm font-medium text-gray-700 mb-1">Website</label>
-                                                <input type="url" id="website" name="website" class="form-input w-full"
+                                                <label for="website" class="form-label">Website</label>
+                                                <input type="url" id="website" name="website" class="form-input"
                                                     placeholder="https://example.com">
                                                 <div id="websiteError" class="error-message">Please enter a valid URL
                                                 </div>
                                             </div>
-                                        </div>
 
-                                        <!-- Principal and Teacher Details -->
-                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                            <!-- Principal and Contact Teacher Section -->
+                                            <div class="md:col-span-2 mt-6">
+                                                <div class="section-title">
+                                                    <i class="fas fa-user-tie mr-2"></i>
+                                                    <h3>Principal & Contact Teacher</h3>
+                                                </div>
+                                            </div>
+
                                             <div>
-                                                <label for="principalName"
-                                                    class="form-label block text-sm font-medium text-gray-700 mb-1 required">Principal
+                                                <label for="principalName" class="form-label required">Principal
                                                     Name</label>
                                                 <input type="text" id="principalName" name="principalName"
-                                                    class="form-input w-full">
-                                                <div id="principalNameError" class="error-message">Principal name is
-                                                    required</div>
+                                                    class="form-input" placeholder="Full name of principal" required>
+                                                <div id="principalNameError" class="error-message">Please enter
+                                                    principal's name</div>
                                             </div>
-                                            <div>
-                                                <label for="principalContact"
-                                                    class="form-label block text-sm font-medium text-gray-700 mb-1 required">Principal
-                                                    Contact</label>
-                                                <input type="text" id="principalContact" name="principalContact"
-                                                    class="form-input w-full">
-                                                <div id="principalContactError" class="error-message">Principal contact
-                                                    is required</div>
-                                            </div>
-                                            <div>
-                                                <label for="teacherName"
-                                                    class="form-label block text-sm font-medium text-gray-700 mb-1">Teacher
-                                                    Name</label>
-                                                <input type="text" id="teacherName" name="teacherName"
-                                                    class="form-input w-full">
-                                            </div>
-                                            <div>
-                                                <label for="teacherContact"
-                                                    class="form-label block text-sm font-medium text-gray-700 mb-1">Teacher
-                                                    Contact</label>
-                                                <input type="text" id="teacherContact" name="teacherContact"
-                                                    class="form-input w-full">
-                                            </div>
-                                        </div>
 
-                                        <!-- Training Sessions -->
-                                        <div class="mb-6">
-                                            <div class="flex justify-between items-center mb-4">
-                                                <h4 class="text-lg font-medium text-gray-800">Training Sessions</h4>
-                                                <button type="button" id="addSessionBtn"
-                                                    class="px-3 py-1 bg-primary text-white rounded-md text-sm hover:bg-primary-dark">
-                                                    <i class="fas fa-plus mr-1"></i> Add Session
+                                            <div>
+                                                <label for="principalContact" class="form-label required">Principal
+                                                    Contact Number</label>
+                                                <input type="tel" id="principalContact" name="principalContact"
+                                                    class="form-input" placeholder="+977-98XXXXXXXX" required>
+                                                <div id="principalContactError" class="error-message">Please enter a
+                                                    valid contact number</div>
+                                            </div>
+
+                                            <div>
+                                                <label for="teacherName" class="form-label">Contact Teacher Name</label>
+                                                <input type="text" id="teacherName" name="teacherName"
+                                                    class="form-input" placeholder="Full name of contact teacher">
+                                            </div>
+
+                                            <div>
+                                                <label for="teacherContact" class="form-label">Teacher Contact
+                                                    Number</label>
+                                                <input type="tel" id="teacherContact" name="teacherContact"
+                                                    class="form-input" placeholder="+977-98XXXXXXXX">
+                                                <div id="teacherContactError" class="error-message">Please enter a valid
+                                                    contact number</div>
+                                            </div>
+
+                                            <!-- NCC Information Section -->
+                                            <div class="md:col-span-2 mt-6">
+                                                <div class="section-title">
+                                                    <i class="fas fa-users mr-2"></i>
+                                                    <h3>NCC Information</h3>
+                                                </div>
+                                            </div>
+
+                                            <!-- Training Sessions -->
+
+                                            <!-- Parent container wrapping everything -->
+                                            <div id="nccInfoContainer" class="bg-white rounded-lg shadow-md p-6 mb-6">
+                                                <h2 class="text-xl font-semibold mb-6 text-gray-700 border-b pb-3">NCC
+                                                    Information</h2>
+
+                                                <!-- Container for dynamically added sessions -->
+                                                <div id="trainingSessionsContainer" class="space-y-7">
+                                                    <!-- Sessions will be added here dynamically -->
+                                                </div>
+
+                                                <!-- Add session button -->
+                                                <div class="mt-6">
+                                                    <button type="button" id="addSessionBtn"
+                                                        class="flex items-center text-white bg-blue-600 hover:bg-green-600 font-medium px-4 py-2 rounded transition-colors duration-300">
+                                                        <i class="fas fa-plus-circle mr-2"></i> Add Training Session
+                                                    </button>
+                                                </div>
+
+                                                <div class="mt-8 bg-blue-50 p-5 rounded-lg">
+                                                    <p class="text-sm text-blue-700">
+                                                        <i class="fas fa-info-circle mr-2"></i>
+                                                        A school can have multiple training sessions in different years.
+                                                        You can add additional sessions after
+                                                        saving this record.
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <!-- Additional Notes Section -->
+                                            <div class="md:col-span-2 mt-6">
+                                                <div class="section-title">
+                                                    <i class="fas fa-sticky-note mr-2"></i>
+                                                    <h3>Additional Notes</h3>
+                                                </div>
+
+                                                <label for="notes" class="form-label">Notes</label>
+                                                <textarea id="notes" name="notes" class="form-input" rows="4"
+                                                    placeholder="Enter any additional information about this school"></textarea>
+                                            </div>
+                                            <!-- Form Actions -->
+                                            <div class="md:col-span-2 flex justify-end space-x-4 mt-8">
+                                                <button type="button" class="btn-outline" id="cancelSchoolFormBtn">
+                                                    Cancel
+                                                </button>
+                                                <button type="submit" id="saveSchoolBtn" class="btn-primary-form">
+                                                    Save School
                                                 </button>
                                             </div>
-                                            <div id="trainingSessionsContainer">
-                                                <!-- Sessions will be added dynamically -->
-                                            </div>
-                                            <div id="divisionError" class="error-message mt-2">Please select a division
-                                                for each session</div>
-                                        </div>
-
-                                        <!-- Notes -->
-                                        <div class="mb-6">
-                                            <label for="notes"
-                                                class="form-label block text-sm font-medium text-gray-700 mb-1">Notes</label>
-                                            <textarea id="notes" name="notes" rows="3"
-                                                class="form-input w-full"></textarea>
-                                        </div>
-
-                                        <!-- Form Actions -->
-                                        <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200">
-                                            <button type="button" id="cancelSchoolFormBtn"
-                                                class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">Cancel</button>
-                                            <button type="submit"
-                                                class="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark">Save
-                                                School</button>
-                                        </div>
-                                    </form>
+                                        </form>
+                                    </div>
                                 </div>
                             </div>
-
                             <!-- View School Modal -->
                             <div id="viewSchoolModal"
                                 class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
@@ -2103,7 +2163,6 @@
                         <div class="loader ease-linear rounded-full border-4 border-t-4 border-olive-400 h-16 w-16">
                         </div>
                     </div>
-
                     <div id="sidebarOverlay" onclick="closeSidebar()"></div>
 
                     <script src="../assets/js/main.js"></script>

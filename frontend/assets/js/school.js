@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = 'http://localhost:8080';
 
 // Global variables
 let currentPage = 1;
@@ -6,13 +6,12 @@ let schoolsPerPage = 10;
 let totalSchools = 0;
 let currentSchoolId = null;
 let isEditMode = false;
+let sessionCount = 0;
 
 // Initialize the application when DOM is loaded
 document.addEventListener('DOMContentLoaded', function () {
     initializeApp();
     setupEventListeners();
-
-    // Add initial training session
     addTrainingSession();
 });
 
@@ -28,6 +27,12 @@ function setupEventListeners() {
     const openFormBtn = document.getElementById('openSchoolFormBtn');
     if (openFormBtn) {
         openFormBtn.addEventListener('click', () => openSchoolForm());
+    }
+
+    // Close school form
+    const closeFormBtn = document.getElementById('closeSchoolFormBtn');
+    if (closeFormBtn) {
+        closeFormBtn.addEventListener('click', () => closeSchoolForm());
     }
 
     // Cancel school form
@@ -84,14 +89,12 @@ function setupEventListeners() {
     });
 
     // Close modals when clicking outside
-    const modals = document.querySelectorAll('.form-container, #viewSchoolModal, #confirmationModal');
+    const modals = document.querySelectorAll('.form-container');
     modals.forEach(modal => {
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
                 if (modal.id === 'schoolFormModal') {
                     closeSchoolForm();
-                } else if (modal.id === 'viewSchoolModal') {
-                    closeViewModal();
                 } else if (modal.id === 'confirmationModal') {
                     closeConfirmationModal();
                 }
@@ -100,46 +103,52 @@ function setupEventListeners() {
     });
 }
 
-// API Service Functions
+// Basic API request function
 async function apiRequest(endpoint, options = {}) {
     const url = `${API_BASE_URL}${endpoint}`;
-    const token = localStorage.getItem('access_token');
-    const defaultHeaders = {
-        'Content-Type': 'application/json',
+    console.log("API Call →", url, options);
+
+    // Default options
+    const defaultOptions = {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
     };
 
-    if (token) {
-        defaultHeaders['Authorization'] = `Bearer ${token}`;
-    }
-
-    const config = {
+    // Merge options
+    options = {
+        ...defaultOptions,
         ...options,
         headers: {
-            ...defaultHeaders,
-            ...(options.headers || {})
-        }
+            ...defaultOptions.headers,
+            ...options.headers,
+        },
     };
 
+    // If there's a body object, stringify it
+    if (options.body && typeof options.body !== 'string') {
+        options.body = JSON.stringify(options.body);
+    }
+
     try {
-        const response = await fetch(url, config);
+        const response = await fetch(url, options);
+
         if (!response.ok) {
-            let errMsg = `HTTP error! status: ${response.status}`;
-            try {
-                const errData = await response.json();
-                if (errData.detail) errMsg = errData.detail;
-            } catch { }
-            throw new Error(errMsg);
+            const errorText = await response.text();
+            console.error('API Error:', response.status, errorText);
+            throw new Error(`API error ${response.status}: ${response.statusText}`);
         }
 
-        // Handle 204 No Content responses
-        if (response.status === 204) {
+        // If the response has content, parse JSON
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+            return await response.json();
+        } else {
             return null;
         }
-
-        return await response.json();
     } catch (error) {
         console.error('API request failed:', error);
-        showNotification(error.message || 'Error connecting to server. Please try again.', 'error');
         throw error;
     }
 }
@@ -147,23 +156,9 @@ async function apiRequest(endpoint, options = {}) {
 // School API functions
 async function getSchools(page = 1, limit = 10) {
     try {
-        const skip = (page - 1) * limit;
-        const response = await apiRequest(`/schools/?skip=${skip}&limit=${limit}`);
-
-        // Handle different response formats
-        let items = [];
-        if (Array.isArray(response)) {
-            items = response;
-            totalSchools = response.length;
-        } else if (response && response.items) {
-            items = response.items;
-            totalSchools = response.total || items.length;
-        } else {
-            items = [];
-            totalSchools = 0;
-        }
-
-        return items;
+        const response = await apiRequest(`/api/schools?page=${page - 1}&size=${limit}&sortBy=name&direction=asc`);
+        totalSchools = response.totalElements;
+        return response.content;
     } catch (error) {
         console.error('Failed to fetch schools:', error);
         showNotification('Failed to load schools', 'error');
@@ -173,8 +168,7 @@ async function getSchools(page = 1, limit = 10) {
 
 async function getSchoolById(id) {
     try {
-        const response = await apiRequest(`/schools/${id}`);
-        return response;
+        return await apiRequest(`/api/schools/${id}`);
     } catch (error) {
         console.error('Failed to fetch school:', error);
         showNotification('Failed to load school details', 'error');
@@ -184,11 +178,10 @@ async function getSchoolById(id) {
 
 async function createSchool(schoolData) {
     try {
-        const response = await apiRequest('/schools/', {
+        return await apiRequest('/api/schools', {
             method: 'POST',
-            body: JSON.stringify(schoolData)
+            body: schoolData
         });
-        return response;
     } catch (error) {
         console.error('Failed to create school:', error);
         throw error;
@@ -197,11 +190,10 @@ async function createSchool(schoolData) {
 
 async function updateSchool(id, schoolData) {
     try {
-        const response = await apiRequest(`/schools/${id}`, {
+        return await apiRequest(`/api/schools/${id}`, {
             method: 'PUT',
-            body: JSON.stringify(schoolData)
+            body: schoolData
         });
-        return response;
     } catch (error) {
         console.error('Failed to update school:', error);
         throw error;
@@ -210,10 +202,9 @@ async function updateSchool(id, schoolData) {
 
 async function deleteSchool(id) {
     try {
-        const response = await apiRequest(`/schools/${id}`, {
+        return await apiRequest(`/api/schools/${id}`, {
             method: 'DELETE'
         });
-        return response;
     } catch (error) {
         console.error('Failed to delete school:', error);
         throw error;
@@ -222,8 +213,7 @@ async function deleteSchool(id) {
 
 async function getStats() {
     try {
-        const response = await apiRequest('/schools/stats/');
-        return response;
+        return await apiRequest('/api/schools/stats');
     } catch (error) {
         console.error('Failed to fetch stats:', error);
         return {
@@ -338,9 +328,11 @@ async function loadSchoolData(schoolId) {
 
 async function handleFormSubmit(e) {
     e.preventDefault();
+    console.log("Form submit triggered 🚀");
 
     if (validateForm()) {
         const formData = gatherFormData();
+        console.log("Submitting school data:", formData);
 
         try {
             if (isEditMode && currentSchoolId) {
@@ -494,45 +486,45 @@ function isValidUrl(url) {
 }
 
 function addTrainingSession(nccBatch = '', startDate = '', passoutDate = '', division = '', index = 0) {
-    const container = document.getElementById('trainingSessionsContainer');
-    const sessionCount = container.querySelectorAll('.session-row').length;
-
-    const newRow = document.createElement('div');
-    newRow.className = 'session-row grid grid-cols-1 md:grid-cols-5 gap-4 bg-gray-50 p-4 rounded-lg mb-3';
-    newRow.innerHTML = `
-                <div>
-                    <label class="form-label block text-sm font-medium text-gray-700 mb-1 required">NCC Batch</label>
-                    <input type="text" name="nccBatch[]" class="form-input w-full" value="${nccBatch}" placeholder="Enter NCC batch" required>
-                </div>
-                <div>
-                    <label class="form-label block text-sm font-medium text-gray-700 mb-1 required">Start Date</label>
-                    <input type="date" name="startDate[]" class="form-input w-full" value="${startDate}" required>
-                </div>
-                <div>
-                    <label class="form-label block text-sm font-medium text-gray-700 mb-1">Passout Date</label>
-                    <input type="date" name="passoutDate[]" class="form-input w-full" value="${passoutDate}">
-                </div>
-                <div>
-                    <label class="form-label block text-sm font-medium text-gray-700 mb-1 required">Division</label>
-                    <div class="flex space-x-4">
-                        <label class="flex items-center">
-                            <input type="radio" name="division-${sessionCount}" value="junior" class="mr-2" ${division === 'junior' ? 'checked' : ''} required>
-                            <span>Junior</span>
-                        </label>
-                        <label class="flex items-center">
-                            <input type="radio" name="division-${sessionCount}" value="senior" class="mr-2" ${division === 'senior' ? 'checked' : ''}>
-                            <span>Senior</span>
-                        </label>
+    const sessionsContainer = document.getElementById('trainingSessionsContainer');
+    const sessionId = sessionCount++;
+    const sessionRow = document.createElement('div');
+    sessionRow.className = 'session-row bg-white p-4 rounded border';
+    sessionRow.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                    <div>
+                        <label class="form-label required">NCC Batch</label>
+                        <input type="text" name="nccBatch[]" class="form-input" placeholder="Enter NCC batch" value="${nccBatch}" required>
+                    </div>
+                    <div>
+                        <label class="form-label required">Start Date</label>
+                        <input type="date" name="startDate[]" class="form-input" value="${startDate}" required>
+                    </div>
+                    <div>
+                        <label class="form-label">Passout Date</label>
+                        <input type="date" name="passoutDate[]" class="form-input" value="${passoutDate}">
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div>
+                            <label class="form-label required">Division</label>
+                            <div class="flex space-x-4 mt-1">
+                                <label class="flex items-center">
+                                    <input type="radio" name="division-${sessionId}" value="junior" class="mr-2" ${division === 'junior' ? 'checked' : ''}>
+                                    <span>Junior</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" name="division-${sessionId}" value="senior" class="mr-2" ${division === 'senior' ? 'checked' : ''}>
+                                    <span>Senior</span>
+                                </label>
+                            </div>
+                        </div>
+                        <button type="button" class="removeSessionBtn text-red-600 hover:text-red-800">
+                            <i class="fas fa-trash"></i>
+                        </button>
                     </div>
                 </div>
-                <div class="flex items-end">
-                    <button type="button" class="removeSessionBtn bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600">
-                        Remove
-                    </button>
-                </div>
             `;
-
-    container.appendChild(newRow);
+    sessionsContainer.appendChild(sessionRow);
 }
 
 async function loadSchools() {
@@ -737,15 +729,7 @@ function renderStats(stats) {
 }
 
 function viewSchool(schoolId) {
-    // Implementation for viewing school details
     showNotification('View school functionality will be implemented soon', 'info');
-}
-
-function closeViewModal() {
-    const viewSchoolModal = document.getElementById('viewSchoolModal');
-    if (viewSchoolModal) {
-        viewSchoolModal.classList.add('hidden');
-    }
 }
 
 function confirmDelete(schoolId) {
@@ -816,3 +800,5 @@ function showNotification(message, type = 'info') {
 
 // Make functions available globally for onclick attributes
 window.changePage = changePage;
+window.closeConfirmationModal = closeConfirmationModal;
+window.executeConfirmedAction = executeConfirmedAction;
