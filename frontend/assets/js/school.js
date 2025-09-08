@@ -55,6 +55,29 @@ function setupEventListeners() {
     if (addSessionBtn) {
         addSessionBtn.addEventListener('click', () => addTrainingSession());
     }
+    // Close view modal
+    const closeViewModalBtn = document.getElementById('closeViewModalBtn');
+    if (closeViewModalBtn) {
+        closeViewModalBtn.addEventListener('click', () => closeViewSchoolModal());
+    }
+
+    // Close view modal with X button
+    const closeViewSchoolModalBtn = document.getElementById('closeViewSchoolModal');
+    if (closeViewSchoolModalBtn) {
+        closeViewSchoolModalBtn.addEventListener('click', () => closeViewSchoolModal());
+    }
+
+    // Tab switching in view modal
+    const tabButtons = document.querySelectorAll('.tab-button');
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const tab = button.getAttribute('data-tab');
+            switchTab(tab);
+        });
+    });
+
+
+
 }
 
 // Event delegation for dynamically created elements
@@ -65,46 +88,65 @@ document.addEventListener('click', function (e) {
         const schoolId = btn.dataset.id;
         openSchoolForm(true, schoolId);
     }
-    // ...existing code for view and delete buttons...
+    // View school buttons
+    if (e.target.classList.contains('view-btn') || e.target.closest('.view-btn')) {
+        const btn = e.target.classList.contains('view-btn') ? e.target : e.target.closest('.view-btn');
+        const schoolId = btn.dataset.id;
+        viewSchool(schoolId);
+    }
+
+    // Delete school buttons
+    if (e.target.classList.contains('delete-btn') || e.target.closest('.delete-btn')) {
+        const btn = e.target.classList.contains('delete-btn') ? e.target : e.target.closest('.delete-btn');
+        const schoolId = btn.dataset.id;
+        confirmDeleteSchool(schoolId);
+    }
+
+    // Remove session buttons
+    if (e.target.classList.contains('removeSessionBtn') || e.target.closest('.removeSessionBtn')) {
+        const btn = e.target.classList.contains('removeSessionBtn') ? e.target : e.target.closest('.removeSessionBtn');
+        const sessionRow = btn.closest('.session-row');
+        if (sessionRow) {
+            sessionRow.remove();
+        }
+    }
 });
 // API request helper
 async function apiRequest(url, options = {}) {
-    const response = await fetch(`${API_BASE_URL}${url}`, {
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers,
-        },
-        ...options,
-        body: options.body ? JSON.stringify(options.body) : undefined,
-    });
-
-    if (!response.ok) {
-        const error = await response.text();
-        throw new Error(error || 'Request failed');
-    }
-
-    return response.json();
-}
-
-// School API functions
-async function getSchools(page = 1, limit = 10) {
     try {
-        const response = await apiRequest(`/api/schools?page=${page - 1}&size=${limit}&sortBy=name&direction=asc`);
+        const response = await fetch(`${API_BASE_URL}${url}`, {
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...(options.headers || {}),
+            },
+            body: options.body ? JSON.stringify(options.body) : undefined,
+        });
 
-        return response.content;
+        if (!response.ok) throw new Error(`API Error: ${response.status}`);
+        return await response.json();
     } catch (error) {
-        console.error('Failed to fetch schools:', error);
-        showNotification('Failed to load schools', 'error');
-        return [];
+        console.error('API request failed:', error);
+        throw error;
     }
 }
-
 // School API functions
+//  async function getSchools(page = 1, limit = 10) {
+//             try {
+//                 const response = await apiRequest(`/api/schools?page=${page - 1}&size=${limit}&sortBy=name&direction=asc`);
+//                 totalSchools = response.totalElements || response.length || 0;
+//                 return response.content || response;
+//             } catch (error) {
+//                 console.error('Failed to fetch schools:', error);
+//                 showNotification('Failed to load schools', 'error');
+//                 return [];
+//             }
+//         }
 async function getSchools(page = 1, limit = 10) {
     try {
         const response = await apiRequest(`/api/schools?page=${page - 1}&size=${limit}&sortBy=name&direction=asc`);
-        totalSchools = response.totalElements;
-        return response.content;
+        totalSchools = response.totalElements || response.length || 0;
+        return response.content || response;
     } catch (error) {
         console.error('Failed to fetch schools:', error);
         showNotification('Failed to load schools', 'error');
@@ -187,6 +229,12 @@ function openSchoolForm(editMode = false, schoolId = null) {
         loadSchoolData(schoolId);
     } else {
         resetForm();
+
+        // Preselect the first district
+        const districtSelect = document.getElementById('district');
+        if (districtSelect && districtSelect.options.length > 1) {
+            districtSelect.selectedIndex = 1;
+        }
     }
 
     const schoolFormModal = document.getElementById('schoolFormModal');
@@ -195,6 +243,7 @@ function openSchoolForm(editMode = false, schoolId = null) {
         document.body.style.overflow = 'hidden';
     }
 }
+
 
 function closeSchoolForm() {
     const schoolFormModal = document.getElementById('schoolFormModal');
@@ -255,14 +304,15 @@ async function loadSchoolData(schoolId) {
             sessionsContainer.innerHTML = '';
 
             if (school.trainingSessions && school.trainingSessions.length > 0) {
-                school.trainingSessions.forEach((session, index) => {
-                    addTrainingSession(
+                sschool.trainingSessions.forEach((session) => {
+                    const sessionRow = addTrainingSession(
                         session.nccBatch,
                         session.startDate,
                         session.passoutDate,
-                        session.division,
-                        index
+                        session.division
                     );
+                    // Optionally, store the original session ID in the DOM
+                    // sessionRow.dataset.sessionId = session.id; // if your backend provides session IDs
                 });
             } else {
                 addTrainingSession();
@@ -273,14 +323,54 @@ async function loadSchoolData(schoolId) {
         showNotification('Failed to load school data', 'error');
     }
 }
+// async function handleFormSubmit(e) {
+//     e.preventDefault();
+//     console.log("Form submit triggered 🚀");
+
+//     // Log all required field values for debugging
+//     const requiredFields = [
+//         'schoolName', 'district', 'municipality', 'wardNumber',
+//         'phoneNumber', 'principalName', 'principalContact'
+//     ];
+//     requiredFields.forEach(field => {
+//         const el = document.getElementById(field);
+//         if (el) {
+//             console.log(`Field ${field}:`, el.value);
+//         } else {
+//             console.warn(`Field ${field} not found in DOM`);
+//         }
+//     });
+
+//     if (validateForm()) {
+//         const formData = gatherFormData();
+//         console.log("Submitting school data:", formData);
+//         console.log("About to call createSchool API...");
+
+//         try {
+//             if (isEditMode && currentSchoolId) {
+//                 await updateSchool(currentSchoolId, formData);
+//                 showNotification('School updated successfully!', 'success');
+//             } else {
+//                 await createSchool(formData);
+//                 showNotification('School added successfully!', 'success');
+//             }
+
+//             closeSchoolForm();
+//             loadSchools();
+//             loadStats();
+//         } catch (error) {
+//             console.error('Failed to save school:', error);
+//             showNotification('Failed to save school. Please try again.', 'error');
+//         }
+//     } else {
+//         console.log("Form validation failed. Not submitting.");
+//     }
+// }
 async function handleFormSubmit(e) {
     e.preventDefault();
-    console.log("Form submit triggered 🚀");
 
     if (validateForm()) {
         const formData = gatherFormData();
-        console.log("Submitting school data:", formData);
-        console.log("About to call createSchool API...");
 
         try {
             if (isEditMode && currentSchoolId) {
@@ -298,8 +388,6 @@ async function handleFormSubmit(e) {
             console.error('Failed to save school:', error);
             showNotification('Failed to save school. Please try again.', 'error');
         }
-    } else {
-        console.log("Form validation failed. Not submitting.");
     }
 }
 
@@ -322,13 +410,15 @@ function gatherFormData() {
         trainingSessions: []
     };
 
-    // Gather training sessions
+    // Select all session rows from the DOM
     const sessionRows = document.querySelectorAll('.session-row');
-    sessionRows.forEach((row, index) => {
+    // Gather training sessions
+    sessionRows.forEach((row) => {
+        const sessionId = row.dataset.sessionId; // use the correct sessionId
         const nccBatch = row.querySelector('input[name="nccBatch[]"]').value;
         const startDate = row.querySelector('input[name="startDate[]"]').value;
         const passoutDate = row.querySelector('input[name="passoutDate[]"]').value;
-        const divisionRadio = row.querySelector(`input[name="division-${index}"]:checked`);
+        const divisionRadio = row.querySelector(`input[name="division-${sessionId}"]:checked`);
 
         if (nccBatch && startDate && divisionRadio) {
             formData.trainingSessions.push({
@@ -365,7 +455,10 @@ function validateForm() {
 
         if (field === "district") {
             console.log("District raw value:", element.value);
-            invalid = !element.value || element.value.trim() === "";
+            invalid = element.value === "";
+            if (invalid && errorElement) {
+                errorElement.textContent = "Please select a district.";
+            }
         } else {
             invalid = !element.value || element.value.trim() === "";
         }
@@ -385,8 +478,11 @@ function validateForm() {
     sessionRows.forEach((row, index) => {
         const nccBatch = row.querySelector('input[name="nccBatch[]"]');
         const startDate = row.querySelector('input[name="startDate[]"]');
-        const divisionRadios = row.querySelectorAll(`input[name="division-${index}"]`);
-        let divisionSelected = false;
+        const sessionId = row.dataset.sessionId; // get the actual sessionId
+        const divisionRadios = row.querySelectorAll(`input[name="division-${sessionId}"]`);
+        let divisionSelected = [...divisionRadios].some(radio => radio.checked);
+
+
 
         divisionRadios.forEach(radio => {
             if (radio.checked) divisionSelected = true;
@@ -405,8 +501,34 @@ function validateForm() {
         }
 
         if (!divisionSelected) {
+            // Show error visually for division
+            divisionRadios.forEach(radio => {
+                radio.classList.add('border-red-500');
+            });
+            // Optionally, show a message near the division radios
+            const divisionErrorId = `divisionError${sessionId}`;
+            let divisionError = row.querySelector(`#${divisionErrorId}`);
+            if (!divisionError) {
+                divisionError = document.createElement('div');
+                divisionError.id = divisionErrorId;
+                divisionError.className = 'text-red-500 text-xs mt-1';
+                divisionError.textContent = 'Please select a division.';
+                row.appendChild(divisionError);
+            } else {
+                divisionError.classList.remove('hidden');
+            }
             isValid = false;
             failedFields.push(`Training session ${index + 1} Division`);
+        } else {
+            // Remove error if division is selected
+            const divisionErrorId = `divisionError${index}`;
+            let divisionError = row.querySelector(`#${divisionErrorId}`);
+            if (divisionError) {
+                divisionError.classList.add('hidden');
+            }
+            divisionRadios.forEach(radio => {
+                radio.classList.remove('border-red-500');
+            });
         }
     });
 
@@ -463,11 +585,55 @@ function isValidUrl(url) {
     }
 }
 
-function addTrainingSession(nccBatch = '', startDate = '', passoutDate = '', division = '', index = 0) {
+// function addTrainingSession(nccBatch = '', startDate = '', passoutDate = '', division = '', index = 0) {
+//     const sessionsContainer = document.getElementById('trainingSessionsContainer');
+//     const sessionId = sessionCount++;
+//     const sessionRow = document.createElement('div');
+//     sessionRow.className = 'session-row bg-white p-4 rounded border';
+//     sessionRow.dataset.sessionId = sessionId; //  here
+//     sessionRow.innerHTML = `
+//                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+//                     <div>
+//                         <label class="block text-sm font-medium text-gray-700 mb-1 required">NCC Batch</label>
+//                         <input type="text" name="nccBatch[]" class="w-full px-3 py-2 border rounded-md" placeholder="Enter NCC batch" value="${nccBatch}" required>
+//                     </div>
+//                     <div>
+//                         <label class="block text-sm font-medium text-gray-700 mb-1 required">Start Date</label>
+//                         <input type="date" name="startDate[]" class="w-full px-3 py-2 border rounded-md" value="${startDate}" required>
+//                     </div>
+//                     <div>
+//                         <label class="block text-sm font-medium text-gray-700 mb-1">Passout Date</label>
+//                         <input type="date" name="passoutDate[]" class="w-full px-3 py-2 border rounded-md" value="${passoutDate}">
+//                     </div>
+//                     <div class="flex items-center space-x-4">
+//                         <div>
+//                             <label class="block text-sm font-medium text-gray-700 mb-1 required">Division</label>
+//                             <div class="flex space-x-4 mt-1">
+//                                 <label class="flex items-center">
+//                                     <input type="radio" name="division-${sessionId}" value="junior" class="mr-2" ${division === 'junior' ? 'checked' : ''}>
+//                                     <span>Junior</span>
+//                                 </label>
+//                                 <label class="flex items-center">
+//                                     <input type="radio" name="division-${sessionId}" value="senior" class="mr-2" ${division === 'senior' ? 'checked' : ''}>
+//                                     <span>Senior</span>
+//                                 </label>
+//                             </div>
+//                         </div>
+//                         <button type="button" class="removeSessionBtn text-red-600 hover:text-red-800">
+//                             <i class="fas fa-trash"></i>
+//                         </button>
+//                     </div>
+//                 </div>
+//             `;
+//     sessionsContainer.appendChild(sessionRow);
+// }
+
+function addTrainingSession(nccBatch = '', startDate = '', passoutDate = '', division = '') {
     const sessionsContainer = document.getElementById('trainingSessionsContainer');
     const sessionId = sessionCount++;
     const sessionRow = document.createElement('div');
     sessionRow.className = 'session-row bg-white p-4 rounded border';
+    sessionRow.dataset.sessionId = sessionId;
     sessionRow.innerHTML = `
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
                     <div>
@@ -504,6 +670,8 @@ function addTrainingSession(nccBatch = '', startDate = '', passoutDate = '', div
             `;
     sessionsContainer.appendChild(sessionRow);
 }
+
+
 
 async function loadSchools() {
     try {
@@ -700,6 +868,160 @@ function renderStats(stats) {
             `;
 }
 
+// View School functionality
+async function viewSchool(schoolId) {
+    try {
+        const school = await getSchoolById(schoolId);
+        if (school) {
+            populateViewModal(school);
+            openViewSchoolModal();
+        }
+    } catch (error) {
+        console.error('Failed to load school for viewing:', error);
+        showNotification('Failed to load school details', 'error');
+    }
+}
+
+function populateViewModal(school) {
+    // Basic Information
+    document.getElementById('view-schoolName').textContent = school.name || '-';
+    document.getElementById('view-district').textContent = school.district || '-';
+    document.getElementById('view-municipality').textContent = school.municipality || '-';
+    document.getElementById('view-wardNumber').textContent = school.wardNumber || '-';
+    document.getElementById('view-areaName').textContent = school.areaName || '-';
+
+    const statusElement = document.getElementById('view-status');
+    if (school.isActive) {
+        statusElement.className = 'px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800';
+        statusElement.textContent = 'Active';
+    } else {
+        statusElement.className = 'px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800';
+        statusElement.textContent = 'Inactive';
+    }
+
+    // Contact Information
+    document.getElementById('view-officialEmail').textContent = school.officialEmail || '-';
+    document.getElementById('view-phoneNumber').textContent = school.phoneNumber || '-';
+    document.getElementById('view-website').textContent = school.website || '-';
+    document.getElementById('view-principalName').textContent = school.principalName || '-';
+    document.getElementById('view-principalContact').textContent = school.principalContact || '-';
+    document.getElementById('view-teacherName').textContent = school.teacherName || '-';
+    document.getElementById('view-teacherContact').textContent = school.teacherContact || '-';
+
+    // NCC Information
+    const trainingSessionsContainer = document.getElementById('view-trainingSessions');
+    trainingSessionsContainer.innerHTML = '';
+
+    if (school.trainingSessions && school.trainingSessions.length > 0) {
+        school.trainingSessions.forEach(session => {
+            const sessionElement = document.createElement('div');
+            sessionElement.className = 'bg-white p-4 rounded border mb-2';
+            sessionElement.innerHTML = `
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">NCC Batch</label>
+                                <p class="text-gray-900">${session.nccBatch || '-'}</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                                <p class="text-gray-900">${session.startDate || '-'}</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Passout Date</label>
+                                <p class="text-gray-900">${session.passoutDate || '-'}</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Division</label>
+                                <p class="text-gray-900">${session.division ? session.division.charAt(0).toUpperCase() + session.division.slice(1) : '-'}</p>
+                            </div>
+                        </div>
+                    `;
+            trainingSessionsContainer.appendChild(sessionElement);
+        });
+    } else {
+        trainingSessionsContainer.innerHTML = '<p class="text-gray-500">No training sessions found</p>';
+    }
+
+    // Notes
+    document.getElementById('view-notes').textContent = school.notes || '-';
+}
+
+function openViewSchoolModal() {
+    const viewModal = document.getElementById('viewSchoolModal');
+    if (viewModal) {
+        viewModal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+
+        // Activate the first tab
+        switchTab('basic');
+    }
+}
+
+function closeViewSchoolModal() {
+    const viewModal = document.getElementById('viewSchoolModal');
+    if (viewModal) {
+        viewModal.classList.add('hidden');
+        document.body.style.overflow = 'auto';
+    }
+}
+
+function switchTab(tabName) {
+    // Deactivate all tabs
+    const tabButtons = document.querySelectorAll('.tab-button');
+    tabButtons.forEach(button => {
+        button.classList.remove('active');
+    });
+
+    // Hide all tab contents
+    const tabContents = document.querySelectorAll('.tab-content');
+    tabContents.forEach(content => {
+        content.classList.add('hidden');
+    });
+
+    // Activate selected tab
+    const activeTabButton = document.querySelector(`.tab-button[data-tab="${tabName}"]`);
+    if (activeTabButton) {
+        activeTabButton.classList.add('active');
+    }
+
+    // Show selected tab content
+    const activeTabContent = document.getElementById(`${tabName}InfoTab`);
+    if (activeTabContent) {
+        activeTabContent.classList.remove('hidden');
+    }
+}
+
+// Delete School functionality
+function confirmDeleteSchool(schoolId) {
+    schoolToDelete = schoolId;
+    const confirmationModal = document.getElementById('confirmationModal');
+    if (confirmationModal) {
+        confirmationModal.classList.remove('hidden');
+    }
+}
+
+function closeConfirmationModal() {
+    schoolToDelete = null;
+    const confirmationModal = document.getElementById('confirmationModal');
+    if (confirmationModal) {
+        confirmationModal.classList.add('hidden');
+    }
+}
+
+async function executeDeleteSchool() {
+    if (schoolToDelete) {
+        try {
+            await deleteSchool(schoolToDelete);
+            showNotification('School deleted successfully!', 'success');
+            closeConfirmationModal();
+            loadSchools();
+            loadStats();
+        } catch (error) {
+            console.error('Failed to delete school:', error);
+            showNotification('Failed to delete school. Please try again.', 'error');
+        }
+    }
+}
 function showNotification(message, type = 'info') {
     // Remove any existing notifications
     const existingNotification = document.getElementById('customNotification');
@@ -723,6 +1045,17 @@ function showNotification(message, type = 'info') {
         }
     }, 3000);
 }
+window.closeConfirmationModal = function () {
+    document.getElementById('confirmationModal').classList.add('hidden');
+};
+
+window.executeConfirmedAction = async function () {
+    if (window.confirmedDeleteId) {
+        await deleteSchool(window.confirmedDeleteId);
+        window.confirmedDeleteId = null;
+    }
+    closeConfirmationModal();
+};
 
 // Make functions available globally for onclick attributes
 window.changePage = changePage;
